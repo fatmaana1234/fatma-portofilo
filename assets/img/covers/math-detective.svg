@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111a3b"/>
+      <stop offset="100%" stop-color="#1c2a5e"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#34d399" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#34d399" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Area Array Grid + Magnifier -->
+    <g fill="#34d399" fill-opacity="0.85">
+      <rect x="165" y="135" width="38" height="38" rx="6"/><rect x="211" y="135" width="38" height="38" rx="6"/><rect x="257" y="135" width="38" height="38" rx="6"/>
+      <rect x="165" y="181" width="38" height="38" rx="6"/><rect x="211" y="181" width="38" height="38" rx="6"/><rect x="257" y="181" width="38" height="38" rx="6"/>
+      <rect x="165" y="227" width="38" height="38" rx="6"/><rect x="211" y="227" width="38" height="38" rx="6"/><rect x="257" y="227" width="38" height="38" rx="6"/>
+    </g>
+    <g fill="#fbbf24" fill-opacity="0.9">
+      <rect x="315" y="135" width="38" height="38" rx="6"/><rect x="361" y="135" width="38" height="38" rx="6"/>
+      <rect x="315" y="181" width="38" height="38" rx="6"/><rect x="361" y="181" width="38" height="38" rx="6"/>
+      <rect x="315" y="227" width="38" height="38" rx="6"/><rect x="361" y="227" width="38" height="38" rx="6"/>
+    </g>
+    <rect x="445" y="140" width="225" height="125" rx="16" fill="#0d132e" stroke="#34d399" stroke-width="2"/>
+    <text x="557" y="196" text-anchor="middle" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#ffffff">3 × (3 + 2)</text>
+    <text x="557" y="236" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#34d399">= 15 sq units</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="165" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#34d399" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#34d399" letter-spacing="0.8">MATHEMATICS</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#34d399"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">رحلة المحقق الرياضي — التجميع والمساحة</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Visualizing Grouping Property &amp; Rectangular Area</text>
+</svg>

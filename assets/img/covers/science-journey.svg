@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#092635"/>
+      <stop offset="100%" stop-color="#134254"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#38bdf8" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#38bdf8" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Prism & Light Spectrum + Leaf + Orbit -->
+    <polygon points="340,285 400,145 460,285" fill="#1e3a5f" stroke="#7dd3fc" stroke-width="3"/>
+    <line x1="175" y1="225" x2="365" y2="215" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+    <line x1="435" y1="210" x2="625" y2="175" stroke="#f87171" stroke-width="5" stroke-linecap="round"/>
+    <line x1="438" y1="222" x2="625" y2="215" stroke="#fbbf24" stroke-width="5" stroke-linecap="round"/>
+    <line x1="442" y1="234" x2="625" y2="255" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+    <line x1="446" y1="246" x2="625" y2="295" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="186" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#38bdf8" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#38bdf8" letter-spacing="0.8">NATURAL SCIENCE</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#38bdf8"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">رحلة في عالم العلوم والظواهر الطبيعية</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Exploring Nature, Energy &amp; Earth Systems</text>
+</svg>

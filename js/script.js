@@ -1,25 +1,36 @@
-/* ==========================================================================
-   Firebase Configuration
-   ========================================================================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyAZvvJOO9pZUODb4v9MMbYsxhk-64Ai7Vc",
-  authDomain: "fatma-portfolio.firebaseapp.com",
-  projectId: "fatma-portfolio",
-  storageBucket: "fatma-portfolio.firebasestorage.app",
-  messagingSenderId: "611447591534",
-  appId: "1:611447591534:web:b17ef5b85692885c964c7f",
-  measurementId: "G-57NCH1TCSQ"
-};
+import {
+  initFirebase,
+  OperationType,
+  handleFirestoreError,
+  collection,
+  doc,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from './firebase-client.js';
 
-// Initialize Firebase (guarded so a network failure doesn't break the page)
 let db = null;
-try {
-  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
+
+function showNotice(message, isError = false) {
+  let toast = document.getElementById('site-toast-banner');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'site-toast-banner';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:0.85rem 1.4rem;border-radius:12px;font-weight:600;font-size:0.92rem;box-shadow:0 10px 30px rgba(0,0,0,0.35);backdrop-filter:blur(12px);max-width:90vw;text-align:center;transition:opacity 0.25s ease;';
+    document.body.appendChild(toast);
   }
-} catch (e) {
-  console.warn('Firebase init failed, using fallback data only:', e);
+  toast.textContent = message;
+  toast.style.background = isError ? 'rgba(239, 68, 68, 0.92)' : 'rgba(16, 185, 129, 0.92)';
+  toast.style.color = '#ffffff';
+  toast.style.opacity = '1';
+  toast.style.display = 'block';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => { toast.style.display = 'none'; }, 260);
+  }, 4000);
 }
 
 /* ==========================================================================
@@ -54,65 +65,140 @@ const preloader = document.getElementById('preloader');
 const translations = {
     en: {
         // Brand & nav
-        brand: 'Fatma <span>Rabea</span>',
-        nav_home: "Home", nav_about: "About", nav_services: "Services",
-        nav_projects: "Projects", nav_testimonials: "Reviews", nav_contact: "Contact",
+        brand: 'Fatma <span>Rabie</span>',
+        nav_home: "Home", nav_about: "About", nav_experience: "Experience",
+        nav_services: "Services", nav_projects: "Projects",
+        nav_contact: "Contact",
 
         // Preloader
         preloader_text: "Loading Experience…",
 
         // Hero
-        hero_pill: "WordPress Developer | Digital Marketing Specialist",
-        hero_title: "Building Beautiful <span>WordPress Websites</span> That Attract, Engage, and Convert",
-        hero_subtitle: "I create modern, fast, and user-friendly WordPress websites designed to help your business grow and stand out in the digital world.",
-        hero_cta1: "View My Work", hero_cta2: "Start Your Project",
-        stat_projects: "Projects", stat_years: "Years", stat_satisfaction: "Satisfaction",
-        badge_1: "WP Expert ✦", badge_2: "SEO Optimized ⚡",
+        hero_pill: "Digital Operations & Technology Specialist",
+        hero_title: "Driving Seamless <span>Digital Operations</span>, Tech Solutions & Content",
+        hero_subtitle: "B.Ed. in Educational Technology (Mansoura University) — bridging business operations, WordPress & WooCommerce management, AI Arabic content projects, educational platforms, and digital media for clients across Saudi Arabia, Oman, and Egypt.",
+        hero_cta1: "Explore My Work", hero_cta2: "Get In Touch",
+        stat_projects: "Projects & Deliverables", stat_years: "Years Experience", stat_markets: "Markets (KSA • Oman • EG)",
+        badge_1: "Digital Operations ✦", badge_2: "AI & Tech Solutions ⚡",
 
         // About
         about_heading: "About Me",
-        about_text_full: "I am a passionate WordPress developer with a strong background in digital marketing and content creation. I specialize in building responsive, visually appealing, and performance-optimized websites. My goal is to create digital experiences that not only look beautiful but also deliver real business results.",
-        career_obj_heading: "Career Objective",
-        career_obj_text: "To design and develop high-quality WordPress websites that help businesses grow, attract customers, and succeed online.",
-        exp_title: "Freelance WordPress Developer",
-        exp_1: "Built responsive WordPress websites",
-        exp_2: "Customized themes and plugins",
-        exp_3: "Improved website performance and SEO",
-        exp_4: "Worked with clients remotely",
+        about_text_full: "I am Fatma Rabie Mahmoud Ali Hammad, a Digital Operations & Technology Specialist holding a Bachelor's degree in Educational Technology from Mansoura University. I bring practical experience coordinating business operations across diverse entities, managing WordPress and WooCommerce platforms, supporting AI-related Arabic content projects, and delivering educational websites and visual presentations.",
+        career_obj_heading: "Operational Philosophy",
+        career_obj_text: "Experienced in overseeing teams, delegating tasks, organizing digital resources, and providing dependable technical and administrative support for clients across Saudi Arabia, Oman, and Egypt — always adaptable, organized, and committed to meeting deadlines.",
+        exp_title: "Core Operational Scope",
+        exp_1: "Digital operations, workflow coordination & team leadership",
+        exp_2: "WordPress websites & WooCommerce store operations",
+        exp_3: "AI project support, Arabic content review & prompt preparation",
+        exp_4: "Educational websites, 3D presentations & technical training",
+        exp_5: "Remote collaboration with clients in KSA, Oman & Egypt",
+        meta_degree: "🎓 B.Ed. Educational Technology — Mansoura Univ. (2023)",
+        meta_location: "📍 Sherbin, Dakahlia, Egypt",
+
+        // Experience & Credentials Timeline
+        timeline_heading: "Experience & Credentials",
+        timeline_subtitle: "A multi-disciplinary track record spanning digital operations, executive coordination, AI content, and educational technology.",
+        job1_period: "Present · Part-Time",
+        job1_loc: "Saudi Arabia",
+        job1_title: "Digital Operations & Technology Specialist",
+        job1_b1: "Manage and update WordPress websites and WooCommerce store operations.",
+        job1_b2: "Organize digital content across platforms and support YouTube & short-form video preparation.",
+        job1_b3: "Coordinate directly with the business owner, manage priorities, and execute technical & administrative tasks.",
+
+        job2_period: "2026 · 3 Months",
+        job2_loc: "Oman",
+        job2_title: "Chief Executive Officer (CEO) – Business Operations",
+        job2_org: "Private Business Group",
+        job2_b1: "Led and managed business operations across a manufacturing factory and a medical complex.",
+        job2_b2: "Oversaw staff, delegated responsibilities, coordinated teams, and monitored execution across both entities.",
+        job2_b3: "Supported technical & programming tasks, graphic design, digital content, and executive planning.",
+
+        job3_period: "2026",
+        job3_loc: "Saudi Arabia",
+        job3_title: "AI Content & Projects Specialist",
+        job3_org: "AI AstorLab",
+        job3_b1: "Prepared, edited, and reviewed Arabic-language content for AI projects ensuring grammar, clarity, and consistency.",
+        job3_b2: "Wrote prompts, descriptions, and structured text used within AI systems and digital tools.",
+        job3_b3: "Organized and uploaded platform content while supporting data and content quality improvement.",
+
+        job4_period: "2026 · 6 Weeks",
+        job4_loc: "Saudi Arabia (Freelance)",
+        job4_title: "Educational Website Designer",
+        job4_b1: "Designed and delivered four structured educational websites for Saudi PhD researchers.",
+        job4_b2: "Organized educational materials via Google Drive and managed revisions, feedback, and final delivery.",
+
+        job5_period: "2024 · 2 Months",
+        job5_loc: "Oman (Freelance)",
+        job5_title: "Educational Presentation Designer",
+        job5_b1: "Designed interactive educational PowerPoint presentations with 3D visual elements for schools.",
+        job5_b2: "Transformed curriculum content into clear, visually organized learning experiences.",
+
+        job6_period: "2023 & Public Service",
+        job6_loc: "KSA & Egypt",
+        job6_title: "ASP.NET Trainer & Technical / Admin Support",
+        job6_b1: "Delivered practical ASP.NET training and technical guidance to a Saudi client over two months.",
+        job6_b2: "Provided computer troubleshooting, Word/Excel administration, and ongoing tech support at an educational institution in Sherbin, Egypt.",
+
+        edu_heading: "🎓 Education & Key Project",
+        edu_degree: "Bachelor of Educational Technology",
+        edu_uni: "Faculty of Specific Education, Mansoura University · 2023",
+        grad_title: "Graduation Project — Educational Programming Website",
+        grad_desc: "Led a 5-member team, distributed tasks, and built the WordPress educational platform and programming materials.",
+
+        cert_heading: "🏅 Certifications & Training",
+        cert_1: "ICDL (International Certification of Digital Literacy)",
+        cert_2: "English Language Certificate — Maaref Platform",
+        cert_3: "Edraak Training: Electronic Game Design & Computer/IT",
+        cert_4: "Computer & Digital Tools Training — Mansoura (2019)",
+        cert_5: "Women's Empowerment Training — Mawaddah Initiative, Ministry of Social Solidarity",
 
         // Skills
-        skills_heading: "My Skills",
-        skills_technical: "Technical",
-        skills_professional: "Professional",
-        skill_1: "WordPress Development",
-        skill_2: "CSS & Responsive Design",
-        skill_3: "SEO Basics",
-        skill_4: "Digital Marketing",
-        skill_5: "Adobe Tools",
-        skill_6: "Video Editing",
-        skill_7: "Communication",
-        skill_8: "Problem Solving",
-        skill_9: "Creativity",
-        skill_10: "Time Management",
+        skills_heading: "Core Competencies & Skills",
+        skills_ops: "Digital Operations & Platforms",
+        skills_technical: "AI, Tech & Design",
+        skills_professional: "Leadership & Operations",
+        skill_1: "Digital Operations & Workflow",
+        skill_2: "WordPress & WooCommerce",
+        skill_3: "Digital Content Management",
+        skill_4: "YouTube & Short-Form Video",
+        skill_5: "Microsoft Word, Excel & PowerPoint",
+        skill_6: "Google Drive Organization",
+        skill_7: "AI Project Support",
+        skill_8: "Arabic AI Content & Review",
+        skill_9: "Prompt & Description Writing",
+        skill_10: "Educational Technology",
+        skill_11: "Graphic & Motion Design",
+        skill_12: "Technical Troubleshooting & ASP.NET",
+        skill_13: "Project & Task Coordination",
+        skill_14: "Team Leadership & Delegation",
+        skill_15: "Client Communication (KSA & Oman)",
+        skill_16: "Customer Service & Admin Support",
+        skill_17: "Problem Solving & Multitasking",
+        skill_18: "Deadline Management",
 
         // Services
-        services_heading: "My Services",
-        srv_1_title: "Custom WordPress Design",
-        srv_1_desc: "Tailored, modern website designs built specifically to reflect your brand identity and convert visitors.",
-        srv_2_title: "WooCommerce Store Setup",
-        srv_2_desc: "Fully functional and beautifully designed e-commerce stores ready to sell your products.",
-        srv_3_title: "Website Speed Optimization",
-        srv_3_desc: "Enhancing website loading times to improve user experience and boost search rankings.",
-        srv_4_title: "SEO Optimization",
-        srv_4_desc: "On-page SEO setup ensuring your website ranks higher on search engines and attracts organic traffic.",
-        srv_5_title: "Website Maintenance",
-        srv_5_desc: "Ongoing support, security updates, and performance monitoring to keep your site running smoothly.",
+        services_heading: "What I Deliver",
+        srv_1_title: "Digital & Business Operations",
+        srv_1_desc: "End-to-end workflow coordination, team task follow-up, executive administrative support, and multi-platform operations management.",
+        srv_2_title: "WordPress & WooCommerce Management",
+        srv_2_desc: "Building, customizing, updating, and maintaining responsive WordPress websites and live WooCommerce online stores.",
+        srv_3_title: "AI Content & Prompt Operations",
+        srv_3_desc: "Crafting, editing, and quality-reviewing Arabic AI content, structured prompts, descriptions, and digital platform datasets.",
+        srv_4_title: "Educational Tech & 3D Presentations",
+        srv_4_desc: "Designing educational websites for researchers and interactive 3D-element PowerPoint presentations for academic learning.",
+        srv_5_title: "Motion Graphics & Digital Media",
+        srv_5_desc: "Creating graphic designs, motion graphics, short-form video content, and supporting YouTube channel operations.",
+        srv_6_title: "Technical Training & User Support",
+        srv_6_desc: "Technical troubleshooting, simplified software/ASP.NET guidance, Google Drive organization, and responsive client support.",
 
         // Projects
         projects_heading: "Featured Projects",
-        projects_subtitle: "A showcase of my recent WordPress websites and creative design work.",
+        projects_subtitle: "My newest creative, motion, brand identity & digital operations deliverables — plus WordPress & WooCommerce platforms and educational websites.",
         filter_all: "All",
-        filter_wordpress: "WordPress",
+        filter_graphic: "Graphic Design",
+        filter_motion: "Motion Graphics",
+        filter_branding: "Brand & Location Maps",
+        filter_wordpress: "Websites & Platforms",
         filter_english: "English Learning",
         filter_arabic: "Arabic Language",
         filter_science: "Science",
@@ -125,7 +211,11 @@ const translations = {
         show_less: "Show Less",
         no_projects: "No projects available yet.",
         preview_project: "Preview Project",
-        cat_wordpress: "WordPress Website",
+        preview_insite: "Open Inside Site",
+        cat_graphic: "Graphic Design Suite",
+        cat_motion: "Motion Graphics",
+        cat_branding: "Brand Identity & Maps",
+        cat_wordpress: "Web & Platform",
         cat_creative: "Creative Work",
         cat_english: "English Learning",
         cat_arabic: "Arabic Language",
@@ -134,6 +224,11 @@ const translations = {
         cat_social: "Social Studies",
         cat_islamic: "Islamic Studies",
         cat_health: "Health & Activity",
+        pv_gallery_hint: "Click any design poster below to inspect it full-screen inside the site",
+        pv_items_count: "Curated Designs",
+        pv_tab_brand: "Brand Guidelines & Location Maps",
+        pv_tab_icons: "Clinic UI Assets & Icons",
+        pv_video_playlist: "All Videos",
 
         // Slider
         slider_heading: "Project Highlights",
@@ -149,10 +244,11 @@ const translations = {
         review_thanks: "Thank you for your review! It will appear shortly.",
 
         // Contact
-        contact_heading: "Let's Build Something Amazing Together",
-        contact_text: "Have a project idea? I'd love to help you bring it to life.",
+        contact_heading: "Let's Work Together",
+        contact_text: "Looking for reliable digital operations, technical support, WordPress management, or AI & creative content? I'd love to connect.",
         contact_email_label: "Email",
         contact_linkedin_label: "LinkedIn Profile",
+        contact_location: "Sherbin, Dakahlia, Egypt",
         contact_ph_name: "Name",
         contact_ph_email: "Email",
         contact_ph_message: "Message",
@@ -160,79 +256,154 @@ const translations = {
         contact_success: "Message sent! I'll get back to you soon.",
 
         // Footer
-        footer_rights: "&copy; <span id='year'></span> Fatma Rabea. All Rights Reserved.",
+        footer_rights: "&copy; <span id='year'></span> Fatma Rabie. All Rights Reserved.",
         footer_admin: "Admin Login",
 
         // Chatbot
         chat_title: "AI Assistant",
         chat_status: "Online",
         chat_ph: "Type a message...",
-        chat_q1: "Pricing & Value",
-        chat_q2: "Your Services",
-        chat_q3: "Hire Fatma",
-        chat_welcome: "Hi there! I'm Fatma's AI assistant. How can I help you with your next WordPress project today? ✨"
+        chat_q1: "Experience & CV",
+        chat_q2: "Services",
+        chat_q3: "Contact Fatma",
+        chat_welcome: "Hi there! I'm Fatma Rabie's virtual assistant. Fatma is a Digital Operations & Technology Specialist — ask me about her experience, services, or how to reach her! ✨"
     },
     ar: {
         // Brand & nav
         brand: 'فاطمة <span>ربيع</span>',
-        nav_home: "الرئيسية", nav_about: "نبذة عني", nav_services: "خدماتي",
-        nav_projects: "مشاريعي", nav_testimonials: "الآراء", nav_contact: "تواصل معي",
+        nav_home: "الرئيسية", nav_about: "نبذة عني", nav_experience: "الخبرات",
+        nav_services: "خدماتي", nav_projects: "مشاريعي",
+        nav_contact: "تواصل معي",
 
         // Preloader
         preloader_text: "جارٍ التحضير…",
 
         // Hero
-        hero_pill: "مطور ووردبريس | أخصائي تسويق رقمي",
-        hero_title: "بناء <span>مواقع ووردبريس</span> جذابة وتفاعلية تحول الزوار إلى عملاء",
-        hero_subtitle: "أقوم بإنشاء مواقع ووردبريس حديثة وسريعة وسهلة الاستخدام مصممة لمساعدة عملك على النمو والتميز في العالم الرقمي.",
-        hero_cta1: "شاهد أعمالي", hero_cta2: "ابدأ مشروعك",
-        stat_projects: "مشروع", stat_years: "سنوات", stat_satisfaction: "رضا العملاء",
-        badge_1: "خبير ووردبريس ✦", badge_2: "تحسين محركات البحث ⚡",
+        hero_pill: "أخصائية العمليات الرقمية والتكنولوجيا",
+        hero_title: "إدارة <span>العمليات الرقمية</span> والحلول التقنية وصناعة المحتوى باحترافية",
+        hero_subtitle: "خريجة تكنولوجيا التعليم (جامعة المنصورة) — أجمع بين تنسيق العمليات التشغيلية، إدارة منصات ووردبريس وووكومرس، دعم مشاريع الذكاء الاصطناعي والمحتوى العربي، وتصميم المواقع التعليمية والوسائط الرقمية لعملاء في السعودية وعُمان ومصر.",
+        hero_cta1: "استكشف أعمالي", hero_cta2: "تواصل معي",
+        stat_projects: "مشروع وعمل رقمي", stat_years: "سنوات خبرة", stat_markets: "أسواق (السعودية • عُمان • مصر)",
+        badge_1: "العمليات الرقمية ✦", badge_2: "الذكاء الاصطناعي والتقنية ⚡",
 
         // About
         about_heading: "نبذة عني",
-        about_text_full: "أنا مطورة ووردبريس شغوفة بخلفية قوية في التسويق الرقمي وإنشاء المحتوى. أتخصص في بناء مواقع متجاوبة وجذابة بصريًا ومحسّنة للأداء. هدفي هو إنشاء تجارب رقمية لا تبدو جميلة فحسب، بل تحقق نتائج أعمال حقيقية.",
-        career_obj_heading: "الهدف المهني",
-        career_obj_text: "تصميم وتطوير مواقع ووردبريس عالية الجودة تساعد الشركات على النمو وجذب العملاء والنجاح عبر الإنترنت.",
-        exp_title: "مطورة ووردبريس مستقلة",
-        exp_1: "بناء مواقع ووردبريس متجاوبة",
-        exp_2: "تخصيص القوالب والإضافات",
-        exp_3: "تحسين أداء المواقع وSEO",
-        exp_4: "العمل عن بُعد مع العملاء",
+        about_text_full: "أنا فاطمة ربيع محمود علي حماد، أخصائية العمليات الرقمية والتكنولوجيا، حاصلة على بكالوريوس تكنولوجيا التعليم من جامعة المنصورة. أمتلك خبرة عملية في تنسيق العمليات التشغيلية والإدارية، إدارة منصات ووردبريس وووكومرس، دعم مشاريع الذكاء الاصطناعي والمحتوى العربي، وتطوير المواقع التعليمية والعروض التقديمية الاحترافية.",
+        career_obj_heading: "منهجية العمل",
+        career_obj_text: "خبرة في الإشراف على الفرق وتوزيع المهام، تنظيم الموارد الرقمية، وتقديم الدعم الفني والإداري الموثوق لعملاء في المملكة العربية السعودية وسلطنة عُمان ومصر — مع التزام تام بالجودة والدقة والمواعيد النهائية.",
+        exp_title: "نطاق العمل الأساسي",
+        exp_1: "العمليات الرقمية، تنسيق سير العمل، وقيادة الفرق",
+        exp_2: "إدارة مواقع ووردبريس وعمليات متاجر ووكومرس",
+        exp_3: "دعم مشاريع الذكاء الاصطناعي ومراجعة المحتوى العربي والأوامر",
+        exp_4: "المواقع التعليمية، العروض ثلاثية الأبعاد، والتدريب التقني",
+        exp_5: "التعاون عن بُعد مع عملاء في السعودية وعُمان ومصر",
+        meta_degree: "🎓 بكالوريوس تكنولوجيا التعليم — جامعة المنصورة (2023)",
+        meta_location: "📍 شربين، الدقهلية، مصر",
+
+        // Experience & Credentials Timeline
+        timeline_heading: "الخبرات العملية والمؤهلات",
+        timeline_subtitle: "مسيرة مهنية متعددة التخصصات تجمع بين العمليات الرقمية، الإدارة التنفيذية، محتوى الذكاء الاصطناعي، وتكنولوجيا التعليم.",
+        job1_period: "الحالي · دوام جزئي",
+        job1_loc: "المملكة العربية السعودية",
+        job1_title: "أخصائية العمليات الرقمية والتكنولوجيا",
+        job1_b1: "إدارة وتحديث مواقع ووردبريس وتشغيل ومتابعة متاجر ووكومرس.",
+        job1_b2: "تنظيم المحتوى الرقمي عبر المنصات ودعم إدارة قناة يوتيوب وتجهيز الفيديوهات القصيرة.",
+        job1_b3: "التواصل المباشر مع صاحب العمل، ترتيب الأولويات، وتنفيذ المهام التقنية والإدارية.",
+
+        job2_period: "2026 · 3 أشهر",
+        job2_loc: "سلطنة عُمان",
+        job2_title: "المدير التنفيذي للعمليات (CEO – Business Operations)",
+        job2_org: "مجموعة أعمال خاصة",
+        job2_b1: "قيادة وإدارة العمليات التشغيلية عبر مصنع إنتاجي ومجمع طبي.",
+        job2_b2: "الإشراف على الموظفين، تفويض المهام، تنسيق الفرق، ومتابعة تنفيذ الأعمال عبر الكيانين.",
+        job2_b3: "دعم العمليات التقنية والمهام البرمجية، المساهمة في التصميم الجرافيكي والمحتوى والتخطيط التنفيذي.",
+
+        job3_period: "2026",
+        job3_loc: "المملكة العربية السعودية",
+        job3_title: "أخصائية محتوى ومشاريع الذكاء الاصطناعي",
+        job3_org: "AI AstorLab",
+        job3_b1: "إعداد وتحرير ومراجعة المحتوى العربي لمشاريع الذكاء الاصطناعي لضمان السلامة اللغوية والوضوح.",
+        job3_b2: "كتابة الأوامر (Prompts) والأوصاف والنصوص المهيكلة المستخدمة في أنظمة الذكاء الاصطناعي.",
+        job3_b3: "تنظيم ورفع المحتوى على المنصات الرقمية ودعم تحسين جودة البيانات والمحتوى.",
+
+        job4_period: "2026 · 6 أسابيع",
+        job4_loc: "السعودية (عمل حر)",
+        job4_title: "مصممة مواقع تعليمية",
+        job4_b1: "تصميم وتطوير وتسليم أربعة مواقع تعليمية متكاملة لباحثين دكتوراه في السعودية.",
+        job4_b2: "تنظيم المواد التعليمية عبر Google Drive وإدارة التعديلات وملاحظات العملاء حتى التسليم.",
+
+        job5_period: "2024 · شهران",
+        job5_loc: "عُمان (عمل حر)",
+        job5_title: "مصممة عروض تعليمية",
+        job5_b1: "تصميم عروض تقديمية تعليمية احترافية مدعومة بعناصر تصميم ثلاثية الأبعاد للمدارس.",
+        job5_b2: "تحويل المحتوى الدراسي إلى عروض مرئية واضحة ومنظمة وجذابة.",
+
+        job6_period: "2023 والخدمة العامة",
+        job6_loc: "السعودية ومصر",
+        job6_title: "مدربة ASP.NET والدعم الفني والإداري",
+        job6_b1: "تقديم تدريب عملي وإرشاد تقني في ASP.NET لعميل في السعودية لمدة شهرين.",
+        job6_b2: "تقديم الدعم الفني وحل مشكلات الحاسب والمهام الإدارية (Word/Excel) بمؤسسة تعليمية في شربين.",
+
+        edu_heading: "🎓 التعليم ومشروع التخرج",
+        edu_degree: "بكالوريوس تكنولوجيا التعليم",
+        edu_uni: "كلية التربية النوعية، جامعة المنصورة · 2023",
+        grad_title: "مشروع التخرج — موقع تعليمي للبرمجة",
+        grad_desc: "قيادة فريق مكون من 5 طلاب وتوزيع المهام وبناء الموقع التعليمي باستخدام ووردبريس وإدارة المواد البرمجية.",
+
+        cert_heading: "🏅 الشهادات والتدريب",
+        cert_1: "شهادة ICDL الدولية لمهارات الحاسب والتحول الرقمي",
+        cert_2: "شهادة اللغة الإنجليزية — منصة معارف",
+        cert_3: "دورات منصة إدراك: تصميم الألعاب الإلكترونية، وتكنولوجيا المعلومات",
+        cert_4: "تدريب الحاسب الآلي والأدوات الرقمية — المنصورة (2019)",
+        cert_5: "تدريب تمكين ودعم المرأة — مبادرة مودة، وزارة التضامن الاجتماعي",
 
         // Skills
-        skills_heading: "مهاراتي",
-        skills_technical: "تقنية",
-        skills_professional: "مهنية",
-        skill_1: "تطوير ووردبريس",
-        skill_2: "CSS وتصميم متجاوب",
-        skill_3: "أساسيات SEO",
-        skill_4: "التسويق الرقمي",
-        skill_5: "أدوات Adobe",
-        skill_6: "تحرير الفيديو",
-        skill_7: "التواصل",
-        skill_8: "حل المشكلات",
-        skill_9: "الإبداع",
-        skill_10: "إدارة الوقت",
+        skills_heading: "المهارات والكفاءات الأساسية",
+        skills_ops: "العمليات الرقمية والمنصات",
+        skills_technical: "الذكاء الاصطناعي والتقنية والتصميم",
+        skills_professional: "القيادة والتنسيق المهني",
+        skill_1: "العمليات الرقمية وتنسيق سير العمل",
+        skill_2: "إدارة ووردبريس وووكومرس",
+        skill_3: "إدارة المحتوى الرقمي",
+        skill_4: "إدارة يوتيوب والفيديوهات القصيرة",
+        skill_5: "مايكروسوفت وورد وإكسل وباوربوينت",
+        skill_6: "تنظيم ملفات Google Drive",
+        skill_7: "دعم مشاريع الذكاء الاصطناعي",
+        skill_8: "المحتوى العربي للذكاء الاصطناعي والمراجعة",
+        skill_9: "كتابة الأوامر (Prompts) والأوصاف",
+        skill_10: "تكنولوجيا التعليم",
+        skill_11: "التصميم الجرافيكي والموشن جرافيك",
+        skill_12: "الدعم الفني وASP.NET",
+        skill_13: "تنسيق المشاريع والمهام",
+        skill_14: "قيادة الفرق وتفويض المهام",
+        skill_15: "التواصل مع العملاء (السعودية وعُمان)",
+        skill_16: "خدمة العملاء والمساندة الإدارية",
+        skill_17: "حل المشكلات وتعدد المهام",
+        skill_18: "الالتزام بالمواعيد النهائية",
 
         // Services
-        services_heading: "خدماتي",
-        srv_1_title: "تصميم ووردبريس مخصص",
-        srv_1_desc: "تصاميم مواقع حديثة ومخصصة تعكس هوية علامتك التجارية وتحوّل الزوار إلى عملاء.",
-        srv_2_title: "إعداد متاجر ووكومرس",
-        srv_2_desc: "متاجر إلكترونية كاملة الوظائف وذات تصميم جميل وجاهزة لبيع منتجاتك.",
-        srv_3_title: "تحسين سرعة الموقع",
-        srv_3_desc: "تحسين أوقات تحميل الموقع لتحسين تجربة المستخدم ورفع ترتيب البحث.",
-        srv_4_title: "تحسين محركات البحث",
-        srv_4_desc: "إعداد SEO على الصفحة لضمان ترتيب أعلى لموقعك في محركات البحث وجذب زيارات عضوية.",
-        srv_5_title: "صيانة المواقع",
-        srv_5_desc: "دعم مستمر وتحديثات أمنية ومراقبة الأداء للحفاظ على سلاسة تشغيل موقعك.",
+        services_heading: "الخدمات التي أقدمها",
+        srv_1_title: "إدارة العمليات الرقمية والتشغيلية",
+        srv_1_desc: "تنسيق سير العمل اليومي، متابعة المهام والفرق، المساندة الإدارية والتنفيذية، وإدارة العمليات عبر المنصات.",
+        srv_2_title: "إدارة مواقع ووردبريس وووكومرس",
+        srv_2_desc: "تصميم وتحديث وإدارة مواقع الووردبريس ومتاجر ووكومرس الإلكترونية وضمان جاهزيتها واستقرارها.",
+        srv_3_title: "محتوى الذكاء الاصطناعي وإعداد الأوامر",
+        srv_3_desc: "إعداد وتحرير ومراجعة المحتوى العربي لمشاريع الذكاء الاصطناعي وكتابة الأوامر (Prompts) وتحسين جودة البيانات.",
+        srv_4_title: "المواقع التعليمية والعروض ثلاثية الأبعاد",
+        srv_4_desc: "بناء مواقع تعليمية للباحثين وتصميم عروض PowerPoint تفاعلية مدعومة بعناصر ثلاثية الأبعاد.",
+        srv_5_title: "الموشن جرافيك والجرافيك والمحتوى المرئي",
+        srv_5_desc: "تنفيذ تصاميم الموشن جرافيك والجرافيك، الفيديوهات القصيرة، ودعم إدارة محتوى قنوات يوتيوب.",
+        srv_6_title: "التدريب التقني والدعم الفني والإداري",
+        srv_6_desc: "حل المشكلات التقنية، التدريب المبسط على البرمجيات وASP.NET، تنظيم Google Drive، وخدمة العملاء.",
 
         // Projects
-        projects_heading: "أبرز المشاريع",
-        projects_subtitle: "عرض لأحدث المواقع التي قمت ببنائها باستخدام ووردبريس بالإضافة إلى مشاريعي الإبداعية الأخرى.",
+        projects_heading: "أبرز الأعمال والمشاريع",
+        projects_subtitle: "أحدث أعمالي في التصميم الجرافيكي، الموشن جرافيك، والهوية البصرية والخرائط (عُمان) — بجانب منصات ووردبريس وووكومرس والمواقع التعليمية.",
         filter_all: "الكل",
-        filter_wordpress: "ووردبريس",
+        filter_graphic: "تصاميم الجرافيك",
+        filter_motion: "الموشن جرافيك",
+        filter_branding: "الهوية البصرية والخرائط",
+        filter_wordpress: "المواقع والمنصات",
         filter_english: "تعلم الإنجليزية",
         filter_arabic: "اللغة العربية",
         filter_science: "العلوم",
@@ -245,8 +416,12 @@ const translations = {
         show_less: "عرض أقل",
         no_projects: "لا توجد مشاريع حالياً.",
         preview_project: "معاينة المشروع",
-        cat_wordpress: "موقع ووردبريس",
-        cat_creative: "أعمال إبداعية",
+        preview_insite: "عرض داخل الموقع",
+        cat_graphic: "تصاميم جرافيك",
+        cat_motion: "موشن جرافيك",
+        cat_branding: "الهوية البصرية والخرائط",
+        cat_wordpress: "موقع / منصة رقمية",
+        cat_creative: "عمل إبداعي",
         cat_english: "تعلم الإنجليزية",
         cat_arabic: "اللغة العربية",
         cat_science: "العلوم",
@@ -254,6 +429,11 @@ const translations = {
         cat_social: "الدراسات الاجتماعية",
         cat_islamic: "الدراسات الإسلامية",
         cat_health: "الصحة والنشاط",
+        pv_gallery_hint: "اضغط على أي تصميم لعرضه بالحجم الكامل داخل الموقع والتنقل بين التصاميم",
+        pv_items_count: "تصميم مختار بعناية",
+        pv_tab_brand: "لوحات الهوية البصرية وخرائط الموقع",
+        pv_tab_icons: "أيقونات وواجهات المجمع الطبي",
+        pv_video_playlist: "قائمة الفيديوهات",
 
         // Slider
         slider_heading: "أبرز المشاريع",
@@ -269,10 +449,11 @@ const translations = {
         review_thanks: "شكراً لتقييمك! سيظهر قريباً.",
 
         // Contact
-        contact_heading: "لنبنِ شيئاً مذهلاً معاً",
-        contact_text: "لديك فكرة مشروع؟ يسعدني مساعدتك في تحويلها إلى واقع.",
+        contact_heading: "لنعمل معاً",
+        contact_text: "هل تبحثين أو تبحث عن أخصائية عمليات رقمية، إدارة منصات، دعم تقني، أو محتوى ذكاء اصطناعي وتصاميم إبداعية؟ يسعدني تواصلك.",
         contact_email_label: "البريد الإلكتروني",
         contact_linkedin_label: "ملف لينكدإن",
+        contact_location: "شربين، الدقهلية، مصر",
         contact_ph_name: "الاسم",
         contact_ph_email: "البريد الإلكتروني",
         contact_ph_message: "الرسالة",
@@ -287,10 +468,10 @@ const translations = {
         chat_title: "المساعد الذكي",
         chat_status: "نشط الآن",
         chat_ph: "اكتب رسالة...",
-        chat_q1: "الأسعار والقيمة",
-        chat_q2: "خدمات فاطمة",
-        chat_q3: "توظيف فاطمة",
-        chat_welcome: "مرحباً! أنا مساعد فاطمة الذكي. كيف يمكنني مساعدتك في مشروع الووردبريس القادم الخاص بك اليوم؟ ✨"
+        chat_q1: "الخبرات والسيرة الذاتية",
+        chat_q2: "الخدمات",
+        chat_q3: "تواصل مع فاطمة",
+        chat_welcome: "مرحباً! أنا المساعد الخاص بفاطمة ربيع — أخصائية العمليات الرقمية والتكنولوجيا. يمكنك سؤالي عن خبراتها أو خدماتها أو طرق التواصل معها! ✨"
     }
 };
 
@@ -397,9 +578,22 @@ if (navLinks) {
         link.addEventListener('click', closeMobileMenu);
     });
 }
-// Close on Escape
+// Close modals / lightbox / menu on Escape & navigate lightbox with arrows
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMobileMenu();
+    const lb = document.getElementById('pvLightbox');
+    const modal = document.getElementById('projectViewerModal');
+    if (lb && lb.classList.contains('active')) {
+        if (e.key === 'Escape') { closeLightbox(); return; }
+        if (e.key === 'ArrowRight') { stepLightbox(currentLang === 'ar' ? -1 : 1); return; }
+        if (e.key === 'ArrowLeft') { stepLightbox(currentLang === 'ar' ? 1 : -1); return; }
+    }
+    if (e.key === 'Escape') {
+        if (modal && modal.classList.contains('active')) {
+            closeProjectViewer();
+        } else {
+            closeMobileMenu();
+        }
+    }
 });
 
 /* ==========================================================================
@@ -517,11 +711,197 @@ function animateCounter(el, target) {
    ========================================================================== */
 const myProjects = [
     {
+        title: "Umm Al-Qura Medical Complex — Graphic Design Campaigns (43 Posters)",
+        title_ar: "مجمع أم القرى الطبي (عُمان) — معرض تصاميم الجرافيك والحملات الإعلانية (43 تصميماً)",
+        desc: "Latest graphic design suite created for Mr. Ahmed's medical complex project in Barka, Oman — covering physiotherapy & rehabilitation campaigns, shockwave & lymphatic devices, office ergonomics, corporate wellness, patient testimonials, and seasonal greetings. Click to view all 43 curated designs inside the site.",
+        desc_ar: "أحدث مجموعة تصاميم جرافيك وحملات سوشيال ميديا لمشروع أ. أحمد (مجمع أم القرى الطبي بولاية بركاء، سلطنة عُمان) — تشمل تصاميم برامج التأهيل الحركي والعصبي، إصابات الملاعب، أجهزة الموجات التصادمية والتصريف اللمفاوي، عروض رمضان والأعياد، والإنفوجرافيك الطبي. اضغط لعرض كل التصاميم معاً داخل الموقع.",
+        image: "public/assets/aistudio/image_20261101_184903.jpg_9c802ebf_2K_e23c5eaf.jpg",
+        showcase: {
+            mode: "posters",
+            backdrop: "public/assets/aistudio/image_20261101_184903.jpg_9c802ebf_2K_e23c5eaf.jpg",
+            left: "public/assets/aistudio/________________________________________9d15bc8d.png",
+            center: "public/assets/aistudio/___________________________________7af432b0.png",
+            right: "public/assets/aistudio/Creating_clinic_graphic_poster_8fa9cea4_2K_b3902490.jpg"
+        },
+        link: "#projects",
+        category: "graphic",
+        inSiteViewer: {
+            type: "gallery",
+            items: [
+                { src: "public/assets/aistudio/___________________________________7af432b0.png", title: "Clinic Services, Devices & Pricing Banner", title_ar: "البوستر الرئيسي لخدمات المجمع والأجهزة والأسعار" },
+                { src: "public/assets/aistudio/image_20261101_184903.jpg_9c802ebf_2K_e23c5eaf.jpg", title: "Ramadan Offers & Free Consultations Campaign", title_ar: "حملة تخفيضات رمضان المبارك والاستشارات المجانية" },
+                { src: "public/assets/aistudio/Creating_clinic_graphic_poster_8fa9cea4_2K_b3902490.jpg", title: "Welcome to Umm Al-Qura Medical Complex", title_ar: "تصميم ترحيبي: أهلاً بكم في مجمع أم القرى الطبي" },
+                { src: "public/assets/aistudio/image_20261101_192514_1_e1b3e180.jpg", title: "Premium Healthcare Arrival Campaign", title_ar: "رعاية صحية راقية — قرارك اليوم راحتك غداً" },
+                { src: "public/assets/aistudio/image_20261101_202708_b39495e0.jpg", title: "Clinic Reception Welcome Poster", title_ar: "بوستر استقبال: أهلاً بكم.. هنا أم القرى" },
+                { src: "public/assets/aistudio/image_20261101_230622_f24800f4.jpg", title: "About Us Clinic Identity Overview", title_ar: "تعريف بالمركز: من نحن؟ (مجمع أم القرى الطبي)" },
+                { src: "public/assets/aistudio/image_20261101_230612_5f9aed0f.jpg", title: "Emergency & Direct Clinic Contact Flyer", title_ar: "تصميم طوارئ وتواصل ومواعيد العمل" },
+                { src: "public/assets/aistudio/image_20261101_192511_a243fec7.jpg", title: "Working Hours Schedule Card", title_ar: "بطاقة أوقات العمل الرسمية من السبت للخميس" },
+                { src: "public/assets/aistudio/________________________________________9d15bc8d.png", title: "Sports Injuries Rehabilitation Program", title_ar: "برنامج الإصابات الرياضية والتأهيل الآمن" },
+                { src: "public/assets/aistudio/image_20261101_184409_d0387576.jpg", title: "Athletes Recovery Program Campaign", title_ar: "تصميم تأهيل الرياضيين: إصابتك الرياضية ما توقف مسيرتك" },
+                { src: "public/assets/aistudio/Creating_Arabic_sports_therapy_p__0943a71c_2a5a7da3.jpg", title: "Sports Physiotherapy Vertical Ad", title_ar: "إعلان عمودي لبرنامج إعادة تأهيل الإصابات الرياضية" },
+                { src: "public/assets/aistudio/_______________________________baa0c62b.png", title: "Back & Neck Pain Treatment Program", title_ar: "برنامج علاج آلام الظهر والرقبة — استعد لحركتك بدون ألم" },
+                { src: "public/assets/aistudio/____3bcb43ed.jpg", title: "Back & Neck Electrotherapy Program", title_ar: "تصميم تأهيل آلام الظهر والرقبة بالتحفيز الكهربائي" },
+                { src: "public/assets/aistudio/3D_infographic_showing_spinal_st__4ca7ff74_2K_ec7eede1.jpg", title: "3D Spinal & Joint Pain Conditions Infographic", title_ar: "إنفوجرافيك ثلاثي الأبعاد لآلام العمود الفقري والمفاصل" },
+                { src: "public/assets/aistudio/Corporate_health_graphic_poster_4074069a_7586cdab.jpg", title: "Office Ergonomics & Spine 3D Infographic", title_ar: "إنفوجرافيك المكتب والعمود الفقري لسلامة الموظفين" },
+                { src: "public/assets/aistudio/image_20261101_184903_1_afcafd18.jpg", title: "Office Workers Back Pain Prevention", title_ar: "حملة قوامك هو درعك للوقاية من آلام الظهر المكتبية" },
+                { src: "public/assets/aistudio/image_20261101_184408_1_c5c81286.jpg", title: "Healthy Spine for Office Workers", title_ar: "برنامج صحة العمود الفقري للموظف العُماني" },
+                { src: "public/assets/aistudio/Medical_promo_poster_design_d53394f1_2K_3c8593fc.jpg", title: "Corporate Employee Wellness Campaign", title_ar: "تصميم برنامج عافية الموظفين للشركات والمؤسسات" },
+                { src: "public/assets/aistudio/image_20261101_184408_7925b290.jpg", title: "Movement & Weight Loss Program", title_ar: "تصميم برنامج الحركة وإنقاص الوزن والصحة العامة" },
+                { src: "public/assets/aistudio/___________________________________0b114b22.png", title: "Knee & Osteoarthritis Rehabilitation Program", title_ar: "برنامج الركبة والخشونة — حركة أسهل لحياة أفضل" },
+                { src: "public/assets/aistudio/Knee_joint_medical_comparison_bb38c419_2K_90a3c939.jpg", title: "3D Knee Joint Anatomy Comparison Visual", title_ar: "تصميم مقارن ثلاثي الأبعاد لصحة مفصل الركبة" },
+                { src: "public/assets/aistudio/Medical_graphic_design_for_clinic_4e4d0057_2K_e850a3ec.jpg", title: "Therapeutic Ultrasound & Knee Care Poster", title_ar: "بوستر جهاز الموجات فوق الصوتية وعلاج الركبة" },
+                { src: "public/assets/aistudio/image_20261101_184415_030556dc.jpg", title: "Frozen Shoulder Physiotherapy Campaign", title_ar: "حملة علاج تيبّس وتجمّد الكتف: كتفك متجمد؟ نذوّبه" },
+                { src: "public/assets/aistudio/___________________________________9eb85bd4.png", title: "Shoulder Mobility & Rehabilitation Program", title_ar: "برنامج تأهيل مشكلات الكتف في عُمان" },
+                { src: "public/assets/aistudio/image_20261101_184406_1_fdca82ad.jpg", title: "Post-Surgery Physical Rehabilitation Banner", title_ar: "برنامج التأهيل بعد العمليات: بعد العملية نرجعك تمشي أقوى" },
+                { src: "public/assets/aistudio/Creating_physical_therapy_poster__0dad641d_2K_f6041be2.jpg", title: "Post-Op Medical Recommendations Program", title_ar: "برامج تأهيل ما بعد الجراحة مخصصة وفق توصيات طبية" },
+                { src: "public/assets/aistudio/1_a1e5582f.jpg", title: "Knee Post-Surgery Progressive Recovery", title_ar: "بنر برنامج إعادة التأهيل بعد جراحة الركبة" },
+                { src: "public/assets/aistudio/image_20261101_184406_8f079171.jpg", title: "Seniors Balance & Mobility Care", title_ar: "برنامج رعاية وتأهيل كبار السن: كبارنا.. مشيتهم عزنا" },
+                { src: "public/assets/aistudio/image_20261101_184407_44c3199b.jpg", title: "Post-Stroke Neurological Recovery Hope", title_ar: "حملة التأهيل بعد الجلطة: الأمل يرجع الحركة" },
+                { src: "public/assets/aistudio/______________________________-1_0b9a7056.png", title: "Integrated Neuro Rehab Series (1/4)", title_ar: "برنامج التأهيل العصبي المتكامل (الجزء الأول)" },
+                { src: "public/assets/aistudio/____________________________-4_c30ada3d.png", title: "Comprehensive Neuro Rehab Exercises", title_ar: "برنامج التأهيل العصبي الشامل والتمارين الوظيفية" },
+                { src: "public/assets/aistudio/Shockwave_therapy_on_knee_7d1525f8-edited_cd79ebc8.jpg", title: "Knee Shockwave Therapy Technology Ad", title_ar: "تصميم تقنية العلاج بالموجات التصادمية للركبة" },
+                { src: "public/assets/aistudio/Arabic_medical_graphic_design_po__d6fb1dcb_2K_4746d65f.jpg", title: "Shockwave Therapy Chronic Pain Relief", title_ar: "بوستر العلاج بالموجات التصادمية للآلام المزمنة" },
+                { src: "public/assets/aistudio/image_20261101_184909_30f780a4.jpg", title: "Plantar Fasciitis Shockwave Campaign", title_ar: "حملة علاج آلام الكعب المزمنة بالموجات التصادمية" },
+                { src: "public/assets/aistudio/image_20261101_184918_773e0020.jpg", title: "Combined Electro & Ultrasound Therapy", title_ar: "تصميم العلاج المزدوج: كهرباء تشفي وموجات ترخي" },
+                { src: "public/assets/aistudio/image_20261101_184903_69bda125.jpg", title: "Lymphatic Drainage Therapy Device", title_ar: "إعلان جهاز التنشيط اللمفاوي وتقليل احتباس السوائل" },
+                { src: "public/assets/aistudio/Arabic_wellness_graphic_poster_d__aed8af39_2K_669109a5.jpg", title: "Modern Lymphatic Drainage & Detox Care", title_ar: "بوستر جهاز التصريف اللمفاوي الحديث" },
+                { src: "public/assets/aistudio/image_20261101_192514_db4742d1.jpg", title: "Women's Pelvic Health Physiotherapy", title_ar: "تصميم صحة الحوض للمرأة — قوة وراحة" },
+                { src: "public/assets/aistudio/image_20261101_192513_0f7e39d3.jpg", title: "Verified Patient Recovery Testimonial Card", title_ar: "تصميم شهادة وتجربة مريض: رجعت أمشي بدون ألم بعد 5 جلسات" },
+                { src: "public/assets/aistudio/image_20261101_231539_dcf3bd70.jpg", title: "Omani National Day Greeting Poster", title_ar: "تصميم تهنئة اليوم الوطني العُماني — عُمان فخرنا" },
+                { src: "public/assets/aistudio/image_20261101_231541_da5d61a0.jpg", title: "Ramadan Kareem Clinic Hours Banner", title_ar: "بنر تهنئة رمضان كريم ومواعيد المجمع" },
+                { src: "public/assets/aistudio/image_20261101_231543_e28a2381.jpg", title: "Eid Al-Fitr Clinic Greeting Card", title_ar: "تصميم تهنئة عيد فطر مبارك ومواعيد العودة" },
+                { src: "public/assets/aistudio/image_20261101_231532_d596d47b.jpg", title: "Eid Al-Adha Clinic Greeting Card", title_ar: "تصميم تهنئة عيد أضحى مبارك" }
+            ]
+        }
+    },
+    {
+        title: "Umm Al-Qura Medical Complex — Motion Graphics & Medical Video Suite (7 Videos)",
+        title_ar: "مجمع أم القرى الطبي (عُمان) — أعمال الموشن جرافيك والفيديوهات الطبية (7 فيديوهات)",
+        desc: "Complete motion graphics and Reels video production for Umm Al-Qura Medical Complex (Mr. Ahmed's project in Oman) — featuring 2 full 16:9 strategic presentations alongside 5 vertical 9:16 social Reels. All 7 videos play directly inside the site.",
+        desc_ar: "إنتاج متكامل لأعمال الموشن جرافيك والفيديوهات التوعوية والتسويقية لمجمع أم القرى الطبي في سلطنة عُمان — يضم عرضين موشن استراتيجيين بمقاس 16:9 بالإضافة إلى 5 فيديوهات ريلز عمودية 9:16 للسوشيال ميديا. جميع الفيديوهات تعمل مباشرة من داخل الموقع.",
+        image: "assets/img/motion_thumb_1.jpg",
+        showcase: {
+            mode: "motion",
+            backdrop: "assets/img/motion_thumb_2.jpg",
+            main: "assets/img/motion_thumb_1.jpg",
+            reelFront: "assets/img/motion_thumb_7.jpg",
+            reelBack: "assets/img/motion_thumb_5.jpg"
+        },
+        link: "#projects",
+        category: "motion",
+        inSiteViewer: {
+            type: "videos",
+            items: [
+                {
+                    src: "public/assets/aistudio/__________________________827c1adc.mp4",
+                    portrait: false,
+                    duration: "05:53 · 16:9",
+                    title: "Umm Al-Qura Complex — Clinic Development Roadmap",
+                    title_ar: "تطوير مجمع أم القرى الطبي — الخطة التطويرية الشاملة",
+                    desc: "Strategic motion presentation detailing service upgrades, patient journey improvements, and marketing workflows.",
+                    desc_ar: "عرض مرئي استراتيجي يستعرض خطوات تطوير جودة الخدمات ورحلة المريض وتحديث المحتوى البصري بالمجمع."
+                },
+                {
+                    src: "public/assets/aistudio/___________________________7da86360.mp4",
+                    portrait: false,
+                    duration: "06:01 · 16:9",
+                    title: "Umm Al-Qura Complex — Rehabilitation & Therapy Guide",
+                    title_ar: "مجمع أم القرى — تأهيل وعلاج متكامل",
+                    desc: "Educational motion film explaining specialized physical therapy programs, devices, and recovery milestones.",
+                    desc_ar: "فيديو موشن تعريفي يشرح برامج التأهيل الحركي والعصبي وأحدث الأجهزة العلاجية المستخدمة في المجمع."
+                },
+                {
+                    src: "public/assets/aistudio/__________________________________________19962a9b.mp4",
+                    portrait: true,
+                    duration: "01:36 · 9:16 Reels",
+                    title: "Visual Upgrade Plan for Physiotherapy Centers (Reels)",
+                    title_ar: "خطة الارتقاء البصري لمراكز العلاج الطبيعي (ريلز)",
+                    desc: "Vertical Reels motion production combining 3D biomechanics visuals, quiz frames, and branded Arabic storytelling.",
+                    desc_ar: "فيديو موشن جرافيك عمودي (Reels) يبرز خطة الارتقاء بالهوية البصرية لمراكز العلاج الطبيعي بأسلوب تفاعلي سريع."
+                },
+                {
+                    src: "public/assets/aistudio/___________________________________________8927d25a.mp4",
+                    portrait: true,
+                    duration: "01:28 · 9:16 Reels",
+                    title: "How to Regain Pain-Free Movement at Umm Al-Qura",
+                    title_ar: "كيف تستعيد حركتك بدون ألم في مجمع أم القرى",
+                    desc: "Patient-centric Reels video simplifying structured physiotherapy sessions from assessment to full mobility.",
+                    desc_ar: "فيديو ريلز توعوي يشرح رحلة التعافي واستعادة الحركة بدون ألم داخل أقسام العلاج الطبيعي بالمجمع."
+                },
+                {
+                    src: "public/assets/aistudio/________________________________________2158de63.mp4",
+                    portrait: true,
+                    duration: "01:32 · 9:16 Reels",
+                    title: "Non-Surgical Spinal Disc Decompression Explained",
+                    title_ar: "كيف يعالج الشد الفقري الديسك بدون جراحة",
+                    desc: "3D anatomical motion explainer breaking down how spinal decompression relieves disc pressure without surgery.",
+                    desc_ar: "موشن جرافيك طبي يشرح آلية علاج الديسك والغضروف بجهاز الشد الفقري بدون تدخل جراحي."
+                },
+                {
+                    src: "public/assets/aistudio/Um_Alqura_Client_Reviews_a88d697f.mp4",
+                    portrait: true,
+                    duration: "01:29 · 9:16 Reels",
+                    title: "Umm Al-Qura Patient Reviews & Success Stories",
+                    title_ar: "آراء وتجارب مراجعي مجمع أم القرى الطبي",
+                    desc: "Social-proof vertical showcase highlighting authentic client feedback, trust signals, and clinical outcomes.",
+                    desc_ar: "فيديو موشن لاستعراض آراء المراجعين وتجارب التحسن الفعلية بعد جلسات التأهيل بالمجمع."
+                },
+                {
+                    src: "public/assets/aistudio/4_424c9953.mp4",
+                    portrait: true,
+                    duration: "01:17 · 9:16 Reels",
+                    title: "3D Paper-Craft Tour Inside Umm Al-Qura Clinic — Oman",
+                    title_ar: "جولة إبداعية ثلاثية الأبعاد داخل مجمع أم القرى — عُمان",
+                    desc: "Creative 3D miniature animation welcoming visitors across Oman into the physical therapy & rehab wing.",
+                    desc_ar: "فيديو موشن بتصميم ثلاثي الأبعاد مُصغّر يأخذ المشاهد من خريطة سلطنة عُمان في جولة داخل صالات العلاج الطبيعي بالمجمع."
+                }
+            ]
+        }
+    },
+    {
+        title: "Mr. Ahmed's Oman Project — Brand Identity, Location Maps & UI Assets",
+        title_ar: "مشروع أ. أحمد في عُمان — الهوية البصرية، خرائط الموقع وأيقونات المجمع",
+        desc: "Complete brand identity boards, official Barka clinic location maps, patient assessment & booking workflow visuals, and custom UI icons — all viewable directly inside this page.",
+        desc_ar: "الحزمة المتكاملة للهوية البصرية لمشروع أ. أحمد (مجمع أم القرى الطبي — سلطنة عُمان): تضم لوحات الهوية البصرية الكاملة، خرائط الموقع في بركاء، مخططات التقييم والحجز، وأيقونات الواجهة المصممة خصيصاً للمشروع — تفتح كلها داخل الموقع مباشرة.",
+        image: "public/assets/aistudio/image_20261101_183712-edited_d047b3f0.jpg",
+        showcase: {
+            mode: "branding",
+            backdrop: "public/assets/aistudio/image_20261101_184904_d70344ed.jpg",
+            map: "public/assets/aistudio/image_20261101_183712-edited_d047b3f0.jpg",
+            identity: "public/assets/aistudio/Medical_clinic_brand_identity_gu__633e1cb2_e9c284cd.jpg",
+            icons: [
+                "public/assets/aistudio/about_us_icon_88588145.png",
+                "public/assets/aistudio/medical_services_icon_c6d48930.png",
+                "public/assets/aistudio/emergency_icon_54c31878.png",
+                "public/assets/aistudio/patient_reviews_icon_fc1ba57a.png"
+            ]
+        },
+        link: "#projects",
+        category: "branding",
+        inSiteViewer: {
+            type: "hub",
+            brandSheets: [
+                { src: "public/assets/aistudio/Medical_clinic_brand_identity_gu__633e1cb2_e9c284cd.jpg", title: "Full Brand Identity System (Logo, Palette, Typography & Values)", title_ar: "نظام الهوية البصرية الكامل (الشعار، الألوان، الخطوط، القيم)" },
+                { src: "public/assets/aistudio/Medical_clinic_brand_guideline_p__9b8da835_6cc32eca.jpg", title: "Clinic Brand Guidelines & Visual Application Board", title_ar: "دليل تطبيقات الهوية البصرية للمجمع الطبي" },
+                { src: "public/assets/aistudio/image_20261101_183712-edited_d047b3f0.jpg", title: "Official Clinic Location Map & Directory — Barka, Oman", title_ar: "خريطة الموقع الرسمية والدليل الطبي — بركاء، سلطنة عُمان" },
+                { src: "public/assets/aistudio/image_20261101_184904_d70344ed.jpg", title: "Illustrated Exterior Map Poster (Barka Public Street)", title_ar: "تصميم الخريطة التوضيحية لموقع المجمع: موقعنا ما يتوه" },
+                { src: "public/assets/aistudio/image_20261101_184900_1_dc18a2ef.jpg", title: "3-Stage Comprehensive Patient Assessment Diagram", title_ar: "إنفوجرافيك خطوات التقييم الطبي الشامل (3 مراحل)" },
+                { src: "public/assets/aistudio/image_20261101_184900_057d84bf.jpg", title: "3-Step WhatsApp & Consultation Booking Process", title_ar: "إنفوجرافيك خطوات الحجز السريع والاستشارة: احجز في دقيقة" }
+            ],
+            icons: [
+                { src: "public/assets/aistudio/about_us_icon_88588145.png", title: "About Us Custom Clinic Icon", title_ar: "أيقونة مَن نحن" },
+                { src: "public/assets/aistudio/medical_services_icon_c6d48930.png", title: "Medical Services Custom Emblem", title_ar: "أيقونة خدماتنا الطبية" },
+                { src: "public/assets/aistudio/emergency_icon_54c31878.png", title: "Emergency Care Custom Badge", title_ar: "أيقونة الطوارئ والتواصل" },
+                { src: "public/assets/aistudio/patient_reviews_icon_fc1ba57a.png", title: "Patient Reviews Custom Badge", title_ar: "أيقونة آراء وتجارب المرضى" }
+            ]
+        }
+    },
+    {
         title: "Egypt DXN Store — WooCommerce Platform",
         title_ar: "متجر DXN مصر - متجر ووكومرس (عميل سعودي)",
         desc: "A complete WooCommerce e-commerce platform built for a client in Saudi Arabia. Designed, developed, and currently fully managed, maintained, and updated by me.",
         desc_ar: "متجر إلكتروني متكامل بنظام WooCommerce لعميل في المملكة العربية السعودية. قمت بتصميمه وتطويره بالكامل، وأتولى الإدارة الشاملة، الصيانة الدورية، التحديثات والمتابعة الفنية المستمرة للمتجر حتى الآن.",
-        image: "https://images.unsplash.com/photo-1556742049-0a670f4a4591?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/egypt-dxn-store.svg",
         link: "https://egyptdxnstore.com/",
         category: "wordpress"
     },
@@ -530,7 +910,7 @@ const myProjects = [
         title_ar: "ماستري فنل - منصة تسويق ومسارات مبيعات",
         desc: "A professional WordPress website built for the same Saudi client, optimized for sales funnels, high conversions, speed, and seamless lead generation.",
         desc_ar: "موقع ووردبريس احترافي لنفس العميل السعودي، متخصص في مسارات المبيعات (Sales Funnels) والحلول التسويقية. تم بناؤه بأعلى معايير السرعة والتجاوب وتحويل الزوار إلى عملاء.",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/mastery-funnel.svg",
         link: "https://masteryfunnel.com/",
         category: "wordpress"
     },
@@ -593,7 +973,7 @@ const myProjects = [
         title_ar: "سلسلة تعلم الإنجليزية الممتعة",
         desc: "An educational video that simplifies English grammar and vocabulary for beginners.",
         desc_ar: "فيديو تعليمي يهدف لتبسيط قواعد ومفردات اللغة الإنجليزية للمبتدئين.",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/english-series.svg",
         link: "https://drive.google.com/file/d/1bf2efrCZKlenyns5MbQY-QZIOX7wz7GL/view?usp=sharing",
         category: "english"
     },
@@ -602,7 +982,7 @@ const myProjects = [
         title_ar: "تعلم الإنجليزية - الجزء الرابع",
         desc: "Continuation of the interactive English learning series to boost listening and pronunciation skills.",
         desc_ar: "استكمال لسلسلة دروس اللغة الإنجليزية التفاعلية لتعزيز مهارات الاستماع والنطق.",
-        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/english-part4.svg",
         link: "https://drive.google.com/file/d/14XB4cpFs-gkePKS_YanoB4wMX-3OMh-j/view?usp=sharing",
         category: "english"
     },
@@ -611,7 +991,7 @@ const myProjects = [
         title_ar: "تعلم الإنجليزية - الجزء الثالث",
         desc: "An advanced lesson in everyday English conversation skills.",
         desc_ar: "درس متقدم في مهارات المحادثة واللغة الإنجليزية اليومية.",
-        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/english-part3.svg",
         link: "https://drive.google.com/file/d/1xqBJJD_trhGlycUAHcOUfhdR4hocOaaQ/view?usp=sharing",
         category: "english"
     },
@@ -620,7 +1000,7 @@ const myProjects = [
         title_ar: "تعلم الإنجليزية - الجزء الثاني",
         desc: "A solid foundation in essential English grammar, simplified.",
         desc_ar: "تأسيس قوي في قواعد اللغة الإنجليزية الأساسية بأسلوب مبسط.",
-        image: "https://images.unsplash.com/photo-1507679799987-c73774586594?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/english-part2.svg",
         link: "https://drive.google.com/file/d/1MA_eLqWRYjchUT8-F4Wkvjtdz_PQCcjv/view?usp=sharing",
         category: "english"
     },
@@ -629,7 +1009,7 @@ const myProjects = [
         title_ar: "مغامرات معسكر أبطال الصحة",
         desc: "An animated video promoting physical activity and vitality for children.",
         desc_ar: "فيديو حركي يهدف لتعزيز النشاط البدني والحيوية لدى الأطفال.",
-        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/health-camp.svg",
         link: "https://drive.google.com/file/d/13L93OX0y-YlrzBbAs877Upe_o_dRP7U0/view?usp=sharing",
         category: "health"
     },
@@ -638,7 +1018,7 @@ const myProjects = [
         title_ar: "دليل الحياة الصحية (English Guide)",
         desc: "An educational file linking English learning with essential health concepts.",
         desc_ar: "ملف تعليمي يربط بين تعلم اللغة الإنجليزية والمفاهيم الصحية الأساسية.",
-        image: "https://images.unsplash.com/photo-1541462608141-ad4d157ed7f4?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/health-life-guide.svg",
         link: "https://drive.google.com/file/d/19DaMioNm2g6LBheM6LraIt-fl6fRprvr/view?usp=sharing",
         category: "health"
     },
@@ -647,7 +1027,7 @@ const myProjects = [
         title_ar: "عالم الدراسات الاجتماعية",
         desc: "An educational video introducing students to history and geography in a storytelling style.",
         desc_ar: "فيديو تعليمي يهدف لتعريف الطلاب بالتاريخ والجغرافيا بأسلوب قصصي.",
-        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/social-world.svg",
         link: "https://drive.google.com/file/d/1t5MHmL4pstdSdltSp-0rzeE5N88brjxJ/view?usp=sharing",
         category: "social"
     },
@@ -656,7 +1036,7 @@ const myProjects = [
         title_ar: "الدراسات الاجتماعية - الجزء الثالث",
         desc: "A journey through the history and civilizations of the world via an engaging educational video.",
         desc_ar: "رحلة معرفية في تاريخ وحضارات العالم من خلال فيديو تعليمي مشوق.",
-        image: "https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/social-part3.svg",
         link: "https://drive.google.com/file/d/1U3bWtzUEDqjMQs3RqK7K5bn-4vIXFNem/view?usp=sharing",
         category: "social"
     },
@@ -665,7 +1045,7 @@ const myProjects = [
         title_ar: "الدراسات الاجتماعية - الجزء الثاني",
         desc: "Strengthening national values and geographical awareness among students visually.",
         desc_ar: "تعزيز القيم الوطنية والوعي الجغرافي لدى الطلاب بأسلوب مرئي.",
-        image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/social-part2.svg",
         link: "https://drive.google.com/file/d/16cTCTfofl1cgnRCcJwg_m1oGRkcOgj-f/view?usp=sharing",
         category: "social"
     },
@@ -674,7 +1054,7 @@ const myProjects = [
         title_ar: "آدابنا الجميلة (النمط السعودي)",
         desc: "A video promoting national identity and social etiquette prevalent in the Kingdom.",
         desc_ar: "فيديو يهدف لتعزيز الهوية الوطنية والآداب الاجتماعية السائدة في المملكة.",
-        image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/social-saudi-manners.svg",
         link: "https://drive.google.com/file/d/11KGDjBBigrb6oE4q75TCKqC4ss3SUWBG/view?usp=sharing",
         category: "social"
     },
@@ -683,7 +1063,7 @@ const myProjects = [
         title_ar: "مغامرات الدراسات الإسلامية",
         desc: "An interactive file instilling Islamic values and morals through stories and activities.",
         desc_ar: "ملف تفاعلي يهدف لغرس القيم والأخلاق الإسلامية من خلال قصص وأنشطة.",
-        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/islamic-adventures.svg",
         link: "https://drive.google.com/file/d/1Y-nad8dno_w64_--ZGjLfgcx-CT-Hrdn/view?usp=sharing",
         category: "islamic"
     },
@@ -692,7 +1072,7 @@ const myProjects = [
         title_ar: "روائع اللغة العربية",
         desc: "An educational video simplifying Arabic grammar and fostering a love of reading.",
         desc_ar: "فيديو تعليمي يهدف لتبسيط قواعد اللغة العربية وحب القراءة.",
-        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/arabic-masterpieces.svg",
         link: "https://drive.google.com/file/d/1sCX3SrvIkyzML_1Wo9qFxgEDo1Lh-iFB/view?usp=sharing",
         category: "arabic"
     },
@@ -701,7 +1081,7 @@ const myProjects = [
         title_ar: "اللغة العربية - مراجعة وتعزيز",
         desc: "A video focusing on writing and spelling skills in an interactive style.",
         desc_ar: "فيديو يركز على مهارات الكتابة والإملاء بأسلوب تفاعلي.",
-        image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/arabic-review.svg",
         link: "https://drive.google.com/file/d/1328QaGOXBmVOzpi245s262O7cD1kTF6Y/view?usp=sharing",
         category: "arabic"
     },
@@ -710,7 +1090,7 @@ const myProjects = [
         title_ar: "اللغة العربية - المستوى الثاني",
         desc: "Developing expression and reading comprehension skills through rich visual content.",
         desc_ar: "تطوير مهارات التعبير والفهم القرائي من خلال محتوى مرئي غني.",
-        image: "https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/arabic-level2.svg",
         link: "https://drive.google.com/file/d/19NGxAlHVpMshAkQ8-ZHD9GYoEsnXQAbk/view?usp=sharing",
         category: "arabic"
     },
@@ -719,7 +1099,7 @@ const myProjects = [
         title_ar: "بوابة علماء المسلمين الاستكشافية",
         desc: "A visual tour highlighting the genius of Arab and Muslim scientists and their inventions.",
         desc_ar: "جولة مرئية تهدف لإبراز عبقرية العلماء العرب والمسلمين واختراعاتهم.",
-        image: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-gateway-muslim.svg",
         link: "https://drive.google.com/file/d/14sDe7FHIAk0NSvCPVkLu9NlwEO6oEVpA/view?usp=sharing",
         category: "science"
     },
@@ -728,7 +1108,7 @@ const myProjects = [
         title_ar: "جابر بن حيان والورق السحري",
         desc: "An illustrated scientific story introducing children to the achievements of chemist Jabir ibn Hayyan.",
         desc_ar: "قصة علمية مصورة تهدف لتعريف الأطفال بإنجازات الكيميائي جابر بن حيان.",
-        image: "https://images.unsplash.com/photo-1454165833767-1330084b1d3a?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-jabir.svg",
         link: "https://drive.google.com/file/d/1Acw5fgDkzbeCkr636dj2yQFz0B2fFGm4/view?usp=sharing",
         category: "science"
     },
@@ -737,7 +1117,7 @@ const myProjects = [
         title_ar: "مغامرات العلماء العرب",
         desc: "A comprehensive file documenting the history of Arabic science and inspiring the next generation.",
         desc_ar: "ملف شامل يهدف لتوثيق تاريخ العلوم العربية وإلهام الجيل القادم.",
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-arab-adventures.svg",
         link: "https://drive.google.com/file/d/1uiiD6_cfvYOB-2-aIv0W0WUHwrUY24PE/view?usp=sharing",
         category: "science"
     },
@@ -746,7 +1126,7 @@ const myProjects = [
         title_ar: "رحلة في عالم العلوم",
         desc: "An educational video exploring natural phenomena around us in a scientific style.",
         desc_ar: "فيديو تعليمي يهدف لاستكشاف ظواهر الطبيعة من حولنا بأسلوب علمي.",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-journey.svg",
         link: "https://drive.google.com/file/d/1OmYYSheXme3GecSbjP7XRFwXks6o0cNL/view?usp=sharing",
         category: "science"
     },
@@ -755,7 +1135,7 @@ const myProjects = [
         title_ar: "مختبر العلوم التفاعلي",
         desc: "A video focusing on simple science experiments that can be done in the classroom.",
         desc_ar: "فيديو يركز على التجارب العلمية البسيطة التي يمكن تنفيذها في الفصل.",
-        image: "https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-lab.svg",
         link: "https://drive.google.com/file/d/1TenJeNksZvFCjiVLhqeqcziynrSMCasN/view?usp=sharing",
         category: "science"
     },
@@ -764,7 +1144,7 @@ const myProjects = [
         title_ar: "العلوم - الجزء الثالث",
         desc: "Deepening students' understanding of science lessons through interactive visual content.",
         desc_ar: "تعميق فهم الطلاب لدروس العلوم من خلال محتوى مرئي تفاعلي.",
-        image: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-part3.svg",
         link: "https://drive.google.com/file/d/16-6ISHkIZVl7_8eAlysq9QJVX7yYXQ-U/view?usp=sharing",
         category: "science"
     },
@@ -773,7 +1153,7 @@ const myProjects = [
         title_ar: "العلوم - الجزء الثاني",
         desc: "Educational content simplifying complex scientific concepts visually.",
         desc_ar: "محتوى تعليمي يهدف لتبسيط المفاهيم العلمية المعقدة بأسلوب بصري.",
-        image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-part2.svg",
         link: "https://drive.google.com/file/d/167cVIZ_lcZD58L49aj3G_wwo0UFq1A_Q/view?usp=sharing",
         category: "science"
     },
@@ -782,7 +1162,7 @@ const myProjects = [
         title_ar: "مغامرات العلوم (أنشطة وتجارب)",
         desc: "A practical guide encouraging students to engage in scientific inquiry and research.",
         desc_ar: "دليل عملي يهدف لتشجيع الطلاب على البحث والاستقصاء العلمي.",
-        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/science-adventures-guide.svg",
         link: "https://drive.google.com/file/d/18kjnBym5bU7Rd5a1RuOnlFOBxRKkB851/view?usp=sharing",
         category: "science"
     },
@@ -791,7 +1171,7 @@ const myProjects = [
         title_ar: "رحلة المحقق الرياضي",
         desc: "A presentation simplifying concepts of grouping and area in mathematics.",
         desc_ar: "عرض تقديمي يهدف لتبسيط مفاهيم التجميع والمساحة في الرياضيات.",
-        image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/math-detective.svg",
         link: "https://docs.google.com/presentation/d/1Qi2RMMvFOZ5yYOYDU7ijli82Ggl0g2oJ/edit?usp=sharing",
         category: "math"
     },
@@ -800,7 +1180,7 @@ const myProjects = [
         title_ar: "وسيلة الرياضيات الإيضاحية",
         desc: "A visual tool enhancing geometric and mathematical understanding for students.",
         desc_ar: "أداة بصرية تهدف لتعزيز الفهم الهندسي والرياضي لدى الطلاب.",
-        image: "https://images.unsplash.com/photo-1454165833767-1330084b1d3a?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/math-illustrative.svg",
         link: "https://drive.google.com/file/d/1rWPJFscc9Wz3WS0kKSwopY8t4Zr1nn36/view?usp=sharing",
         category: "math"
     },
@@ -809,7 +1189,7 @@ const myProjects = [
         title_ar: "رياضيات الصف الثالث الابتدائي",
         desc: "An interactive lesson to learn area calculation and the grouping property smartly.",
         desc_ar: "درس تفاعلي يهدف لتعلم حساب المساحة وخاصية التجميع بذكاء.",
-        image: "https://images.unsplash.com/photo-1544391682-1717bf70ce01?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/math-grade3.svg",
         link: "https://docs.google.com/presentation/d/13HBsXSM9_UZhYdB0Q_DOups_TMiYzTc_/edit?usp=sharing",
         category: "math"
     },
@@ -818,7 +1198,7 @@ const myProjects = [
         title_ar: "أساسيات الرياضيات",
         desc: "An educational tool simplifying basic arithmetic operations.",
         desc_ar: "وسيلة تعليمية تهدف لتبسيط العمليات الحسابية الأساسية.",
-        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/math-essentials.svg",
         link: "https://drive.google.com/file/d/12xWq7_V4cxLIvWhJaIRJFE4VFWUJ2BDg/view?usp=sharing",
         category: "math"
     },
@@ -827,60 +1207,336 @@ const myProjects = [
         title_ar: "الهندسة والمساحة",
         desc: "A visual explanation simplifying geometric concepts and area measurement.",
         desc_ar: "شرح مرئي يهدف لتبسيط المفاهيم الهندسية وقياس المساحات.",
-        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop",
+        image: "assets/img/covers/math-geometry.svg",
         link: "https://drive.google.com/file/d/1oF2i1ujoPTbP_Uhi2n4csY4bh6CQblcy/view?usp=sharing",
         category: "math"
     }
 ];
 
 /* ==========================================================================
+   In-Site Project Viewer Modal (Gallery / Video Theater / Brand & PDF Hub)
+   Zero External Redirects — Everything Opens Directly Inside the Site
+   ========================================================================== */
+let pvLightboxItems = [];
+let pvLightboxIndex = 0;
+
+function openLightbox(items, startIndex = 0) {
+    const lb = document.getElementById('pvLightbox');
+    const img = document.getElementById('pvLbImg');
+    const caption = document.getElementById('pvLbCaption');
+    if (!lb || !img || !items || !items.length) return;
+
+    pvLightboxItems = items;
+    pvLightboxIndex = (startIndex + items.length) % items.length;
+    const item = pvLightboxItems[pvLightboxIndex];
+    const title = currentLang === 'ar' ? (item.title_ar || item.title) : item.title;
+
+    img.src = encodeURI(item.src);
+    img.alt = title;
+    if (caption) {
+        caption.textContent = `${pvLightboxIndex + 1} / ${pvLightboxItems.length} — ${title}`;
+    }
+    lb.classList.add('active');
+    lb.setAttribute('aria-hidden', 'false');
+    playSound('open');
+}
+
+function stepLightbox(delta) {
+    if (!pvLightboxItems.length) return;
+    openLightbox(pvLightboxItems, pvLightboxIndex + delta);
+}
+
+function closeLightbox() {
+    const lb = document.getElementById('pvLightbox');
+    if (!lb) return;
+    lb.classList.remove('active');
+    lb.setAttribute('aria-hidden', 'true');
+}
+
+function closeProjectViewer() {
+    closeLightbox();
+    const modal = document.getElementById('projectViewerModal');
+    const body = document.getElementById('pvModalBody');
+    if (!modal) return;
+    modal.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (_) {} });
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    if (body) body.innerHTML = '';
+    document.body.style.overflow = '';
+}
+
+function openProjectViewer(proj) {
+    const modal = document.getElementById('projectViewerModal');
+    const kicker = document.getElementById('pvModalKicker');
+    const titleEl = document.getElementById('pvModalTitle');
+    const body = document.getElementById('pvModalBody');
+    if (!modal || !body) return;
+
+    const t = translations[currentLang];
+    if (kicker) kicker.textContent = getProjCategoryLabel(proj.category);
+    if (titleEl) titleEl.textContent = getProjTitle(proj);
+
+    const cfg = proj.inSiteViewer || {};
+    body.innerHTML = '';
+
+    // 1. Multi-Image Graphic Design Gallery
+    if (cfg.type === 'gallery' && Array.isArray(cfg.items)) {
+        const items = cfg.items;
+        body.innerHTML = `
+            <p class="pv-intro">${getProjDesc(proj)}</p>
+            <div class="pv-gallery-toolbar">
+                <span>${items.length} ${t.pv_items_count}</span>
+                <span>${t.pv_gallery_hint}</span>
+            </div>
+            <div class="pv-gallery-grid" id="pvGalleryGrid"></div>`;
+
+        const grid = body.querySelector('#pvGalleryGrid');
+        items.forEach((item, idx) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'pv-gallery-item';
+            const itemTitle = currentLang === 'ar' ? (item.title_ar || item.title) : item.title;
+            card.innerHTML = `
+                <div class="pv-gallery-thumb">
+                    <img src="${encodeURI(item.src)}" alt="${itemTitle}" loading="lazy">
+                </div>
+                <div class="pv-gallery-caption">
+                    <strong>${itemTitle}</strong>
+                    <span>#${String(idx + 1).padStart(2, '0')}</span>
+                </div>`;
+            card.addEventListener('click', () => openLightbox(items, idx));
+            grid.appendChild(card);
+        });
+    }
+    // 2. Interactive Multi-Video Motion Graphics Theater
+    else if (cfg.type === 'videos' && Array.isArray(cfg.items)) {
+        const videos = cfg.items;
+        body.innerHTML = `
+            <p class="pv-intro">${getProjDesc(proj)}</p>
+            <div class="pv-theater">
+                <div class="pv-stage-card">
+                    <div class="pv-video-box" id="pvVideoBox">
+                        <video id="pvVideoPlayer" controls playsinline preload="metadata"></video>
+                    </div>
+                    <div class="pv-video-details">
+                        <div class="pv-video-details-meta" id="pvVideoMeta"></div>
+                        <h3 id="pvVideoTitle"></h3>
+                        <p id="pvVideoDesc"></p>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--clr-text-muted);margin-bottom:0.65rem;">
+                        ${t.pv_video_playlist} (${videos.length})
+                    </div>
+                    <div class="pv-playlist" id="pvPlaylist"></div>
+                </div>
+            </div>`;
+
+        const videoBox = body.querySelector('#pvVideoBox');
+        const videoEl = body.querySelector('#pvVideoPlayer');
+        const metaEl = body.querySelector('#pvVideoMeta');
+        const vTitleEl = body.querySelector('#pvVideoTitle');
+        const vDescEl = body.querySelector('#pvVideoDesc');
+        const playlistEl = body.querySelector('#pvPlaylist');
+
+        const selectVideo = (idx, autoPlay = false) => {
+            const v = videos[idx];
+            if (!v) return;
+            videoBox.classList.toggle('is-portrait', Boolean(v.portrait));
+            videoEl.pause();
+            videoEl.src = encodeURI(v.src);
+            videoEl.load();
+            if (autoPlay) videoEl.play().catch(() => {});
+            metaEl.textContent = v.duration || '';
+            vTitleEl.textContent = currentLang === 'ar' ? (v.title_ar || v.title) : v.title;
+            vDescEl.textContent = currentLang === 'ar' ? (v.desc_ar || v.desc) : v.desc;
+            playlistEl.querySelectorAll('.pv-playlist-item').forEach((btn, bIdx) => {
+                btn.classList.toggle('active', bIdx === idx);
+            });
+        };
+
+        videos.forEach((v, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'pv-playlist-item' + (idx === 0 ? ' active' : '');
+            const vt = currentLang === 'ar' ? (v.title_ar || v.title) : v.title;
+            btn.innerHTML = `
+                <span class="pv-playlist-index">${String(idx + 1).padStart(2, '0')}</span>
+                <span class="pv-playlist-info">
+                    <strong>${vt}</strong>
+                    <span>${v.duration || ''}</span>
+                </span>`;
+            btn.addEventListener('click', () => {
+                selectVideo(idx, true);
+                playSound('click');
+            });
+            playlistEl.appendChild(btn);
+        });
+
+        selectVideo(0, false);
+    }
+    // 3. Brand Identity, Location Maps & Icons Hub
+    else if (cfg.type === 'hub') {
+        body.innerHTML = `
+            <p class="pv-intro">${getProjDesc(proj)}</p>
+            <div class="pv-hub-tabs" role="tablist">
+                <button type="button" class="pv-tab-btn active" data-tab="brand" role="tab">${t.pv_tab_brand} (${(cfg.brandSheets || []).length})</button>
+                <button type="button" class="pv-tab-btn" data-tab="icons" role="tab">${t.pv_tab_icons} (${(cfg.icons || []).length})</button>
+            </div>
+            <div id="pvHubContent"></div>`;
+
+        const hubContent = body.querySelector('#pvHubContent');
+        const renderHubTab = (tabKey) => {
+            hubContent.innerHTML = '';
+            if (tabKey === 'brand' && Array.isArray(cfg.brandSheets)) {
+                const grid = document.createElement('div');
+                grid.className = 'pv-gallery-grid';
+                cfg.brandSheets.forEach((item, idx) => {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'pv-gallery-item';
+                    const itemTitle = currentLang === 'ar' ? (item.title_ar || item.title) : item.title;
+                    card.innerHTML = `
+                        <div class="pv-gallery-thumb">
+                            <img src="${encodeURI(item.src)}" alt="${itemTitle}" loading="lazy">
+                        </div>
+                        <div class="pv-gallery-caption">
+                            <strong>${itemTitle}</strong>
+                            <span>#${String(idx + 1).padStart(2, '0')}</span>
+                        </div>`;
+                    card.addEventListener('click', () => openLightbox(cfg.brandSheets, idx));
+                    grid.appendChild(card);
+                });
+                hubContent.appendChild(grid);
+            } else if (tabKey === 'icons' && Array.isArray(cfg.icons)) {
+                const grid = document.createElement('div');
+                grid.className = 'pv-asset-icon-grid';
+                cfg.icons.forEach((item, idx) => {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'pv-gallery-item';
+                    const itemTitle = currentLang === 'ar' ? (item.title_ar || item.title) : item.title;
+                    card.innerHTML = `
+                        <div class="pv-asset-icon-thumb">
+                            <img src="${encodeURI(item.src)}" alt="${itemTitle}" loading="lazy">
+                        </div>
+                        <div class="pv-gallery-caption">
+                            <strong>${itemTitle}</strong>
+                            <span>PNG UI Asset</span>
+                        </div>`;
+                    card.addEventListener('click', () => openLightbox(cfg.icons, idx));
+                    grid.appendChild(card);
+                });
+                hubContent.appendChild(grid);
+            }
+        };
+
+        body.querySelectorAll('.pv-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                body.querySelectorAll('.pv-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderHubTab(btn.getAttribute('data-tab'));
+                playSound('click');
+            });
+        });
+
+        renderHubTab('brand');
+    }
+    // 4. Generic single local video/PDF/image fallback (stays inside site)
+    else if (proj.link && proj.link.toLowerCase().endsWith('.pdf')) {
+        body.innerHTML = `
+            <p class="pv-intro">${getProjDesc(proj)}</p>
+            <div class="pv-pdf-shell">
+                <iframe class="pv-pdf-frame" src="${encodeURI(proj.link)}#view=FitH" title="${getProjTitle(proj)}"></iframe>
+            </div>`;
+    } else if (proj.link && proj.link.toLowerCase().endsWith('.mp4')) {
+        body.innerHTML = `
+            <p class="pv-intro">${getProjDesc(proj)}</p>
+            <div class="pv-stage-card">
+                <div class="pv-video-box">
+                    <video controls autoplay playsinline src="${encodeURI(proj.link)}"></video>
+                </div>
+            </div>`;
+    }
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    playSound('open');
+}
+
+function setupProjectViewerModal() {
+    const closeBtn = document.getElementById('pvCloseBtn');
+    const backdrop = document.getElementById('pvBackdrop');
+    const lbClose = document.getElementById('pvLbClose');
+    const lbPrev = document.getElementById('pvLbPrev');
+    const lbNext = document.getElementById('pvLbNext');
+    const lb = document.getElementById('pvLightbox');
+
+    closeBtn?.addEventListener('click', closeProjectViewer);
+    backdrop?.addEventListener('click', closeProjectViewer);
+    lbClose?.addEventListener('click', closeLightbox);
+    lbPrev?.addEventListener('click', () => stepLightbox(-1));
+    lbNext?.addEventListener('click', () => stepLightbox(1));
+    lb?.addEventListener('click', (e) => {
+        if (e.target === lb) closeLightbox();
+    });
+}
+
+/* ==========================================================================
    Projects: load + render + filter + show-more
    ========================================================================== */
-// Normalize old category values to the new lowercase scheme
 function normalizeCategory(cat) {
     if (!cat) return 'other';
     const c = String(cat).toLowerCase().trim();
     if (c === 'wordpress' || c === 'wp') return 'wordpress';
+    if (c === 'motion_graphic') return 'motion';
     if (c === 'other') return 'other';
     return c;
 }
 
+function hasInSiteViewer(proj) {
+    if (!proj) return false;
+    if (proj.inSiteViewer) return true;
+    const link = (proj.link || '').toLowerCase();
+    return link.endsWith('.mp4') || link.endsWith('.pdf');
+}
+
+function renderLocalProjectsFallback() {
+    allProjectsCache = [...myProjects];
+    renderFilters(allProjectsCache);
+    renderSlider(allProjectsCache);
+    renderProjects(allProjectsCache, currentFilter || 'all');
+}
+
 function loadProjects() {
-    // Try Firebase; fall back to local data immediately if no DB
-    if (!db) {
-        allProjectsCache = [...myProjects];
-        renderFilters(allProjectsCache);
-        renderSlider(allProjectsCache);
-        renderProjects(allProjectsCache, 'all');
-        return;
-    }
+    // Always render built-in portfolio projects immediately
+    renderLocalProjectsFallback();
+
+    if (!db) return;
+
     try {
-        db.collection("projects").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+        const projectsQuery = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+        onSnapshot(projectsQuery, (snapshot) => {
             const firebaseProjects = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                firebaseProjects.push({ id: doc.id, ...data, category: normalizeCategory(data.category) });
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const normalized = { id: docSnap.id, ...data, category: normalizeCategory(data.category) };
+                if (!myProjects.some(mp => (mp.link && mp.link !== '#projects' && mp.link === normalized.link) || mp.title === normalized.title)) {
+                    firebaseProjects.push(normalized);
+                }
             });
-            const otherFirebaseProjects = firebaseProjects.filter(fp =>
-                !myProjects.some(mp => mp.link === fp.link || mp.title === fp.title)
-            );
-            allProjectsCache = [...myProjects, ...otherFirebaseProjects];
+            allProjectsCache = [...myProjects, ...firebaseProjects];
             renderFilters(allProjectsCache);
             renderSlider(allProjectsCache);
             renderProjects(allProjectsCache, currentFilter);
         }, (err) => {
-            console.warn("Firebase error, using local data:", err);
-            allProjectsCache = [...myProjects];
-            renderFilters(allProjectsCache);
-            renderSlider(allProjectsCache);
-            renderProjects(allProjectsCache, 'all');
+            renderLocalProjectsFallback();
+            handleFirestoreError(err, OperationType.LIST, 'projects');
         });
     } catch (e) {
-        console.warn("Firebase exception, using local data:", e);
-        allProjectsCache = [...myProjects];
-        renderFilters(allProjectsCache);
-        renderSlider(allProjectsCache);
-        renderProjects(allProjectsCache, 'all');
+        renderLocalProjectsFallback();
+        handleFirestoreError(e, OperationType.LIST, 'projects');
     }
 }
 
@@ -889,6 +1545,9 @@ function getProjDesc(p) { return currentLang === 'ar' ? (p.desc_ar || p.desc) : 
 
 function getProjCategoryLabel(cat) {
     const keyMap = {
+        graphic: 'cat_graphic',
+        motion: 'cat_motion',
+        branding: 'cat_branding',
         wordpress: 'cat_wordpress',
         english: 'cat_english',
         arabic: 'cat_arabic',
@@ -903,8 +1562,79 @@ function getProjCategoryLabel(cat) {
 }
 
 function isVideoProject(p) {
-    return (p.link && (p.link.includes('canva.link') || p.link.includes('.mp4') || p.link === '#')) ||
+    if (p.category === 'motion') return true;
+    return (p.link && (p.link.includes('canva.link') || p.link.includes('.mp4'))) ||
            (p.title && p.title.toLowerCase().includes('video'));
+}
+
+function getProjectTypeIcon(p) {
+    if (p.category === 'graphic') return '🎨';
+    if (p.category === 'branding') return '📘';
+    if (isVideoProject(p)) return '🎬';
+    return '🌐';
+}
+
+function buildProjectThumbHTML(proj, isSlider = false) {
+    const title = getProjTitle(proj);
+    const sc = proj.showcase;
+    if (sc && sc.mode === 'posters') {
+        return `
+            <div class="thumb-showcase">
+                <img src="${encodeURI(sc.backdrop)}" alt="" class="thumb-backdrop" loading="lazy">
+                <div class="thumb-vignette"></div>
+                <div class="thumb-fan">
+                    <div class="thumb-poster-frame thumb-poster-left">
+                        <img src="${encodeURI(sc.left)}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="thumb-poster-frame thumb-poster-center">
+                        <img src="${encodeURI(sc.center)}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="thumb-poster-frame thumb-poster-right">
+                        <img src="${encodeURI(sc.right)}" alt="${title}" loading="lazy">
+                    </div>
+                </div>
+            </div>`;
+    }
+    if (sc && sc.mode === 'motion') {
+        return `
+            <div class="thumb-showcase">
+                <img src="${encodeURI(sc.backdrop)}" alt="" class="thumb-backdrop" loading="lazy">
+                <div class="thumb-vignette"></div>
+                <div class="thumb-motion-stage">
+                    <div class="thumb-cinema-screen">
+                        <img src="${encodeURI(sc.main)}" alt="${title}" loading="lazy">
+                        <span class="thumb-play-dot" aria-hidden="true">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                        </span>
+                    </div>
+                    <div class="thumb-reel-card secondary">
+                        <img src="${encodeURI(sc.reelBack)}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="thumb-reel-card">
+                        <img src="${encodeURI(sc.reelFront)}" alt="${title}" loading="lazy">
+                    </div>
+                </div>
+            </div>`;
+    }
+    if (sc && sc.mode === 'branding') {
+        const iconTags = (sc.icons || []).map(ic => `<img src="${encodeURI(ic)}" alt="" loading="lazy">`).join('');
+        return `
+            <div class="thumb-showcase">
+                <img src="${encodeURI(sc.backdrop)}" alt="" class="thumb-backdrop" loading="lazy">
+                <div class="thumb-vignette"></div>
+                <div class="thumb-brand-stage">
+                    <div class="thumb-map-board">
+                        <img src="${encodeURI(sc.map)}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="thumb-identity-sheet">
+                        <img src="${encodeURI(sc.identity)}" alt="${title}" loading="lazy">
+                    </div>
+                    ${iconTags ? `<div class="thumb-icons-strip">${iconTags}</div>` : ''}
+                </div>
+            </div>`;
+    }
+    const imgClass = isSlider ? 'slider-bg-img' : 'project-img';
+    return `<img src="${encodeURI(proj.image)}" alt="${title}" class="${imgClass}" loading="lazy" onerror="this.src='assets/img/covers/mastery-funnel.svg'">`;
 }
 
 function renderProjects(projects, filter = 'all') {
@@ -920,23 +1650,26 @@ function renderProjects(projects, filter = 'all') {
         return;
     }
 
-    // Determine initial visible count based on screen size
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const initialCount = isMobile ? MOBILE_INITIAL_COUNT : DESKTOP_INITIAL_COUNT;
     visibleCount = initialCount;
 
     container.innerHTML = '';
     filtered.forEach((proj, idx) => {
-        const typeIcon = isVideoProject(proj) ? '🎬' : '🌐';
+        const typeIcon = getProjectTypeIcon(proj);
+        const inSite = hasInSiteViewer(proj);
+        const ctaText = inSite ? translations[currentLang].preview_insite : translations[currentLang].preview_project;
         const div = document.createElement('div');
         div.className = `project-card glass ${proj.category}`;
         if (idx >= visibleCount) div.classList.add('hidden-card');
+
+        const linkAttrs = inSite ? 'href="#projects"' : `href="${proj.link}" target="_blank" rel="noopener"`;
         div.innerHTML = `
-            <a href="${proj.link}" target="_blank" rel="noopener" class="project-card-link">
+            <a ${linkAttrs} class="project-card-link">
                 <div class="project-img-container">
-                    <img src="${proj.image}" alt="${getProjTitle(proj)}" class="project-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=600&auto=format&fit=crop'">
+                    ${buildProjectThumbHTML(proj, false)}
                     <div class="project-overlay">
-                        <span class="btn btn-primary">${translations[currentLang].preview_project}</span>
+                        <span class="btn btn-primary">${ctaText}</span>
                     </div>
                     <div class="project-type-badge">${typeIcon}</div>
                 </div>
@@ -946,10 +1679,17 @@ function renderProjects(projects, filter = 'all') {
                     <p>${getProjDesc(proj)}</p>
                 </div>
             </a>`;
+
+        if (inSite) {
+            const linkEl = div.querySelector('.project-card-link');
+            linkEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                openProjectViewer(proj);
+            });
+        }
         container.appendChild(div);
     });
 
-    // Show / hide "Show More" button
     const showMoreBtn = document.getElementById('showMoreBtn');
     if (showMoreBtn) {
         if (isMobile && filtered.length > MOBILE_INITIAL_COUNT) {
@@ -967,11 +1707,13 @@ function renderFilters(projects) {
     const filterContainer = document.getElementById('projectFilters');
     if (!filterContainer) return;
 
-    // Build dynamic filters based on actual categories present
     const presentCats = new Set(projects.map(p => p.category));
-    const catOrder = ['wordpress','english','arabic','science','math','social','islamic','health','other'];
+    const catOrder = ['graphic', 'motion', 'branding', 'wordpress', 'english', 'arabic', 'science', 'math', 'social', 'islamic', 'health', 'other'];
     const labelKeyMap = {
         all: 'filter_all',
+        graphic: 'filter_graphic',
+        motion: 'filter_motion',
+        branding: 'filter_branding',
         wordpress: 'filter_wordpress',
         english: 'filter_english',
         arabic: 'filter_arabic',
@@ -987,7 +1729,7 @@ function renderFilters(projects) {
     filterContainer.innerHTML = '';
     filters.forEach(cat => {
         const btn = document.createElement('button');
-        btn.className = 'filter-btn' + (cat === 'all' ? ' active' : '');
+        btn.className = 'filter-btn' + (cat === currentFilter ? ' active' : '');
         btn.setAttribute('data-filter', cat);
         btn.setAttribute('data-i18n', labelKeyMap[cat]);
         btn.textContent = translations[currentLang][labelKeyMap[cat]] || cat;
@@ -1012,14 +1754,12 @@ function setupShowMore() {
 
         const isExpanded = showMoreBtn.classList.contains('expanded');
         if (isExpanded) {
-            // Collapse back to initial count
             cards.forEach((c, i) => {
                 if (i >= MOBILE_INITIAL_COUNT) c.classList.add('hidden-card');
             });
             showMoreBtn.classList.remove('expanded');
             showMoreBtn.textContent = translations[currentLang].show_more;
         } else {
-            // Expand all
             cards.forEach(c => c.classList.remove('hidden-card'));
             showMoreBtn.classList.add('expanded');
             showMoreBtn.textContent = translations[currentLang].show_less;
@@ -1027,7 +1767,6 @@ function setupShowMore() {
         playSound('click');
     });
 
-    // Re-render projects when viewport crosses the mobile/desktop boundary
     let wasMobile = window.matchMedia('(max-width: 768px)').matches;
     let resizeTimer = null;
     window.addEventListener('resize', () => {
@@ -1060,25 +1799,32 @@ function getSliderCardsPerView() {
 
 function renderSlider(projects) {
     const track = document.getElementById('sliderTrack');
-    const dotsContainer = document.getElementById('sliderDots');
     if (!track) return;
 
-    // Pick top 8 projects for slider (mix categories)
     const featured = projects.slice(0, Math.min(8, projects.length));
 
     track.innerHTML = '';
-    featured.forEach((proj, idx) => {
+    featured.forEach((proj) => {
+        const inSite = hasInSiteViewer(proj);
+        const linkAttrs = inSite ? 'href="#projects"' : `href="${proj.link}" target="_blank" rel="noopener"`;
         const card = document.createElement('div');
         card.className = 'slider-card';
         card.innerHTML = `
-            <a href="${proj.link}" target="_blank" rel="noopener" style="display:block; width:100%; height:100%; position:relative;">
-                <img src="${proj.image}" alt="${getProjTitle(proj)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=800&auto=format&fit=crop'">
+            <a ${linkAttrs} class="slider-card-link" style="display:block; width:100%; height:100%; position:relative;">
+                ${buildProjectThumbHTML(proj, true)}
                 <div class="slider-card-tag">${getProjCategoryLabel(proj.category)}</div>
                 <div class="slider-card-overlay">
                     <h3>${getProjTitle(proj)}</h3>
                     <p>${getProjDesc(proj)}</p>
                 </div>
             </a>`;
+        if (inSite) {
+            const linkEl = card.querySelector('.slider-card-link');
+            linkEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                openProjectViewer(proj);
+            });
+        }
         track.appendChild(card);
     });
 
@@ -1189,22 +1935,48 @@ function loadReviews() {
     if (!container) return;
     if (!db) { container.innerHTML = `<p>${translations[currentLang].no_reviews}</p>`; return; }
     try {
-        db.collection("reviews").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+        const reviewsQuery = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+        onSnapshot(reviewsQuery, (snapshot) => {
             const reviews = [];
-            snapshot.forEach(doc => reviews.push(doc.data()));
-            container.innerHTML = reviews.length === 0 ? `<p>${translations[currentLang].no_reviews}</p>` : '';
+            snapshot.forEach(docSnap => reviews.push(docSnap.data()));
+            container.innerHTML = '';
+            if (reviews.length === 0) {
+                const empty = document.createElement('p');
+                empty.textContent = translations[currentLang].no_reviews;
+                container.appendChild(empty);
+                return;
+            }
             reviews.forEach(review => {
                 const div = document.createElement('div');
                 div.className = 'testimonial-card glass';
-                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-                div.innerHTML = `<div class="stars">${stars}</div><p style="font-style:italic; flex-grow:1;">"${review.text}"</p><p style="font-weight:bold; color: var(--clr-text-main);">- ${review.name}</p>`;
+                const safeRating = Math.min(5, Math.max(1, Number(review.rating) || 5));
+
+                const starsEl = document.createElement('div');
+                starsEl.className = 'stars';
+                starsEl.textContent = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
+
+                const quoteEl = document.createElement('p');
+                quoteEl.style.fontStyle = 'italic';
+                quoteEl.style.flexGrow = '1';
+                quoteEl.textContent = `"${String(review.text || '')}"`;
+
+                const authorEl = document.createElement('p');
+                authorEl.style.fontWeight = 'bold';
+                authorEl.style.color = 'var(--clr-text-main)';
+                authorEl.textContent = `- ${String(review.name || '')}`;
+
+                div.appendChild(starsEl);
+                div.appendChild(quoteEl);
+                div.appendChild(authorEl);
                 container.appendChild(div);
             });
         }, (err) => {
             container.innerHTML = `<p>${translations[currentLang].no_reviews}</p>`;
+            handleFirestoreError(err, OperationType.LIST, 'reviews');
         });
     } catch (e) {
         container.innerHTML = `<p>${translations[currentLang].no_reviews}</p>`;
+        handleFirestoreError(e, OperationType.LIST, 'reviews');
     }
 }
 
@@ -1236,22 +2008,29 @@ function setupForms() {
         });
     }
     if (reviewForm) {
-        reviewForm.addEventListener('submit', (e) => {
+        reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('reviewerName').value.trim();
-            const text = document.getElementById('reviewText').value.trim();
-            const rating = parseInt(ratingValue.value);
-            if (!name || !text || !rating) return;
+            const name = document.getElementById('reviewerName').value.trim().slice(0, 100);
+            const text = document.getElementById('reviewText').value.trim().slice(0, 1000);
+            const rating = parseInt(ratingValue.value, 10);
+            if (!name || !text || !Number.isInteger(rating) || rating < 1 || rating > 5) return;
             if (db) {
-                db.collection("reviews").add({
-                    name, text, rating,
-                    createdAt: firebase.firestore.Timestamp.now()
-                }).catch(err => console.warn(err));
+                try {
+                    await addDoc(collection(db, 'reviews'), {
+                        name,
+                        text,
+                        rating,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (err) {
+                    showNotice(translations[currentLang].no_reviews, true);
+                    handleFirestoreError(err, OperationType.CREATE, 'reviews');
+                }
             }
             reviewForm.reset();
             document.querySelectorAll('#starRating span').forEach(s => s.classList.remove('active'));
             ratingValue.value = '';
-            alert(translations[currentLang].review_thanks);
+            showNotice(translations[currentLang].review_thanks);
             playSound('send');
         });
     }
@@ -1259,20 +2038,27 @@ function setupForms() {
     // Contact form
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('contactName').value.trim();
-            const email = document.getElementById('contactEmail').value.trim();
-            const message = document.getElementById('contactMessage').value.trim();
+            const name = document.getElementById('contactName').value.trim().slice(0, 100);
+            const email = document.getElementById('contactEmail').value.trim().slice(0, 150);
+            const message = document.getElementById('contactMessage').value.trim().slice(0, 3000);
             if (!name || !email || !message) return;
             if (db) {
-                db.collection("messages").add({
-                    name, email, message,
-                    createdAt: firebase.firestore.Timestamp.now()
-                }).catch(err => console.warn(err));
+                try {
+                    await addDoc(collection(db, 'messages'), {
+                        name,
+                        email,
+                        message,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (err) {
+                    showNotice('Could not send message. Please check your input.', true);
+                    handleFirestoreError(err, OperationType.CREATE, 'messages');
+                }
             }
             contactForm.reset();
-            alert(translations[currentLang].contact_success);
+            showNotice(translations[currentLang].contact_success);
             playSound('send');
         });
     }
@@ -1355,24 +2141,24 @@ function processAIResponse(input) {
     let response = "";
 
     if (currentLang === 'ar') {
-        if (lowerInput.includes('pricing') || lowerInput.includes('سعر') || lowerInput.includes('تكلفة') || lowerInput.includes('كم')) {
-            response = "فاطمة تقدم باقات متنوعة تناسب احتياجاتك. هل تبحث عن متجر إلكتروني أم موقع تعريفي لخدماتك؟";
+        if (lowerInput.includes('experience') || lowerInput.includes('cv') || lowerInput.includes('خبر') || lowerInput.includes('سيرة')) {
+            response = "فاطمة ربيع أخصائية العمليات الرقمية والتكنولوجيا (بكالوريوس تكنولوجيا التعليم - جامعة المنصورة). عملت كمديرة تنفيذية للعمليات في عُمان، وأخصائية محتوى ذكاء اصطناعي في AI AstorLab بالسعودية، ومصممة مواقع وعروض تعليمية، وتدير حالياً مواقع ووردبريس ومتاجر ووكومرس لعملاء في السعودية.";
         } else if (lowerInput.includes('services') || lowerInput.includes('خدمات')) {
-            response = "فاطمة متخصصة في تصميم مواقع الووردبريس، تحسين السرعة (SEO)، وإنشاء المتاجر الإلكترونية الاحترافية.";
+            response = "تقدم فاطمة خدمات متكاملة تشمل: إدارة العمليات الرقمية وتنسيق الفرق، إدارة ووردبريس وووكومرس، إعداد ومراجعة المحتوى العربي للذكاء الاصطناعي والأوامر (Prompts)، المواقع التعليمية والعروض ثلاثية الأبعاد، الموشن جرافيك والجرافيك، والدعم الفني والإداري.";
         } else if (lowerInput.includes('contact') || lowerInput.includes('تواصل') || lowerInput.includes('توظيف') || lowerInput.includes('email') || lowerInput.includes('ايميل')) {
-            response = "يمكنك مراسلة فاطمة مباشرة عبر البريد الإلكتروني: fatmaana4444@gmail.com أو ملء نموذج التواصل أسفله!";
+            response = "يمكنك التواصل مع فاطمة عبر البريد الإلكتروني: fatmarabea4444@gmail.com أو عبر حساب LinkedIn أو عبر نموذج التواصل أسفله!";
         } else {
-            response = "أنا هنا للمساعدة! هل تود معرفة المزيد عن أعمال فاطمة السابقة في الووردبريس؟";
+            response = "أنا هنا للمساعدة! يمكنك سؤالي عن خبرات فاطمة في العمليات الرقمية، الذكاء الاصطناعي، ووردبريس، المواقع التعليمية، أو طرق التواصل معها.";
         }
     } else {
-        if (lowerInput.includes('pricing') || lowerInput.includes('cost') || lowerInput.includes('price') || lowerInput.includes('how much')) {
-            response = "Fatma offers competitive pricing models. Are you looking for a simple portfolio or a full WooCommerce store?";
+        if (lowerInput.includes('experience') || lowerInput.includes('cv') || lowerInput.includes('resume')) {
+            response = "Fatma Rabie is a Digital Operations & Technology Specialist (B.Ed. Educational Technology, Mansoura University). Her experience includes CEO – Business Operations in Oman, AI Content & Projects Specialist at AI AstorLab (KSA), Educational Website & 3D Presentation Design, ASP.NET training, and WordPress & WooCommerce operations.";
         } else if (lowerInput.includes('services') || lowerInput.includes('what do you do')) {
-            response = "Fatma specializes in Custom WordPress Design, Speed Optimization, and E-commerce scaling.";
+            response = "Fatma delivers Digital & Business Operations coordination, WordPress & WooCommerce management, Arabic AI Content & Prompt preparation, Educational Websites & 3D Presentations, Motion Graphics & Graphic Design, and Technical/Admin Support.";
         } else if (lowerInput.includes('contact') || lowerInput.includes('hire') || lowerInput.includes('email')) {
-            response = "You can reach Fatma at fatmaana4444@gmail.com. She usually responds within a few hours!";
+            response = "You can reach Fatma directly at fatmarabea4444@gmail.com, connect via her LinkedIn profile, or send a message using the contact form below!";
         } else {
-            response = "That sounds interesting! Fatma has helped many businesses grow with WordPress. Would you like to see her process?";
+            response = "I'd be happy to help! Ask me about Fatma's experience across KSA, Oman & Egypt, her digital operations & AI content services, or how to contact her.";
         }
     }
     sendBotMessage(response);
@@ -1383,11 +2169,24 @@ function processAIResponse(input) {
    ========================================================================== */
 function setupIntersectionObservers() {
     const fadeElements = document.querySelectorAll('.fade-up, .fade-in, .scale-in');
+    const revealVisibleNow = () => {
+        fadeElements.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight + 120) {
+                el.classList.add('visible');
+            }
+        });
+    };
+    revealVisibleNow();
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.01, rootMargin: '120px 0px' });
     fadeElements.forEach(el => observer.observe(el));
 
     // Active nav link based on visible section
@@ -1453,15 +2252,19 @@ function loadSiteSettings() {
     // Then try Firebase (overrides localStorage if present)
     if (db) {
         try {
-            db.collection('settings').doc('site').onSnapshot(doc => {
-                if (doc.exists) {
-                    const s = doc.data();
+            onSnapshot(doc(db, 'settings', 'site'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const s = docSnap.data();
                     const merged = { ...defaults, ...s };
                     applySiteSettings(merged);
-                    try { localStorage.setItem('site_settings', JSON.stringify(merged)); } catch(e) {}
+                    try { localStorage.setItem('site_settings', JSON.stringify(merged)); } catch (e) {}
                 }
-            }, () => { /* silent */ });
-        } catch (e) { /* silent */ }
+            }, (err) => {
+                handleFirestoreError(err, OperationType.GET, 'settings/site');
+            });
+        } catch (e) {
+            handleFirestoreError(e, OperationType.GET, 'settings/site');
+        }
     }
 }
 
@@ -1475,7 +2278,7 @@ function hidePreloader() {
     }
 }
 
-function init() {
+async function init() {
     // Apply theme + language first
     setTheme(currentTheme);
     setLanguage(currentLang);
@@ -1484,16 +2287,15 @@ function init() {
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    // Setup
-    loadProjects();
-    loadReviews();
+    // Render static/local UI & observers immediately so page never stalls
+    renderLocalProjectsFallback();
+    setupProjectViewerModal();
     setupIntersectionObservers();
     setupChatbot();
     setupForms();
     setupShowMore();
     setupSliderControls();
     setupSmoothScroll();
-    loadSiteSettings();
 
     // Animate counters once hero is visible
     setTimeout(() => {
@@ -1503,11 +2305,22 @@ function init() {
         });
     }, 600);
 
-    // Hide preloader once everything is ready
+    // Hide preloader once initial UI is ready
     setTimeout(hidePreloader, 400);
 
     // Initial scroll state
     onScroll();
+
+    // Initialize Firebase from firebase-applet-config.json & attach Firestore listeners
+    const fb = await initFirebase();
+    db = fb.db;
+    loadProjects();
+    loadReviews();
+    loadSiteSettings();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

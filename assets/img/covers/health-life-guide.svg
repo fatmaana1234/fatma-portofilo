@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d291e"/>
+      <stop offset="100%" stop-color="#19432d"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#4ade80" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#4ade80" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Balanced Plate -->
+    <circle cx="290" cy="220" r="105" fill="#14532d" stroke="#86efac" stroke-width="4"/>
+    <circle cx="290" cy="220" r="78" fill="#166534" stroke="#4ade80" stroke-dasharray="8 6" stroke-width="2"/>
+    <path d="M290 142 L290 298 M212 220 L368 220" stroke="#86efac" stroke-opacity="0.5" stroke-width="2"/>
+    <text x="252" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#dcfce7">FRUITS</text>
+    <text x="328" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#dcfce7">GREENS</text>
+    <text x="252" y="255" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#dcfce7">PROTEIN</text>
+    <text x="328" y="255" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#dcfce7">WATER</text>
+    <!-- Vocab Guide Card -->
+    <rect x="440" y="125" width="250" height="190" rx="16" fill="#0b2217" stroke="#4ade80" stroke-opacity="0.6"/>
+    <text x="465" y="165" font-family="Inter, sans-serif" font-size="16" font-weight="800" fill="#86efac">HEALTH VOCABULARY</text>
+    <text x="465" y="202" font-family="Inter, sans-serif" font-size="15" fill="#fff">• Balanced Diet</text>
+    <text x="465" y="236" font-family="Inter, sans-serif" font-size="15" fill="#fff">• Daily Exercise</text>
+    <text x="465" y="270" font-family="Inter, sans-serif" font-size="15" fill="#fff">• Healthy Habits</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="256" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#4ade80" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#4ade80" letter-spacing="0.8">HEALTHY LIFE • ENGLISH</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#4ade80"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">دليل الحياة الصحية (باللغة الإنجليزية)</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Nutrition, Wellness &amp; Health Concepts in English</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#170f2e"/>
+      <stop offset="100%" stop-color="#241645"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#fbbf24" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#fbbf24" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Left Funnel Graphic -->
+    <polygon points="105,115 345,115 305,175 145,175" fill="#a855f7" fill-opacity="0.85"/>
+    <polygon points="152,185 298,185 268,245 182,245" fill="#ec4899" fill-opacity="0.88"/>
+    <polygon points="188,255 262,255 245,318 205,318" fill="#fbbf24"/>
+    <text x="225" y="151" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#fff">TRAFFIC &amp; LEADS</text>
+    <text x="225" y="220" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#fff">NURTURE FUNNEL</text>
+    <text x="225" y="292" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#0f172a">SALES</text>
+    <!-- Right Analytics Card -->
+    <rect x="385" y="110" width="320" height="218" rx="16" fill="#110b24" stroke="#fbbf24" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="410" y="142" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#fde68a">CONVERSION GROWTH · masteryfunnel.com</text>
+    <polyline points="415,280 465,248 515,256 565,205 615,190 675,148" fill="none" stroke="#34d399" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="565" cy="205" r="6" fill="#fbbf24"/>
+    <circle cx="675" cy="148" r="7" fill="#34d399"/>
+    <rect x="415" y="292" width="250" height="10" rx="5" fill="#ffffff" fill-opacity="0.12"/>
+    <rect x="415" y="292" width="195" height="10" rx="5" fill="#fbbf24"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="286" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#fbbf24" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#fbbf24" letter-spacing="0.8">WORDPRESS • SALES FUNNELS</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#fbbf24"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">ماستري فنل — منصة مسارات المبيعات والتسويق</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Mastery Funnel • Conversion Architecture &amp; Lead Automation</text>
+</svg>

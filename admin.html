@@ -136,22 +136,29 @@
     <main>
         <!-- Login Section -->
         <section id="loginSection" class="admin-login">
-            <div class="glass" style="padding: 3rem; max-width: 400px; width: 90%;">
-                <h2 class="text-center" style="margin-bottom: 2rem;">Admin Login</h2>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <input type="password" id="adminPassword" placeholder="Enter Password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-full">Access Dashboard</button>
-                    <p id="loginError" style="color: #ef4444; margin-top: 1rem; text-align: center; display: none;">
-                        Incorrect password.</p>
-                </form>
+            <div class="glass" style="padding: 3rem; max-width: 440px; width: 90%; text-align: center;">
+                <h2 style="margin-bottom: 0.75rem;">Admin Login</h2>
+                <p style="color: var(--clr-text-muted); font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.6;">
+                    Sign in with your authorized Google admin account to manage Firestore projects, reviews, and site settings.
+                    <br>سجّل الدخول بحساب Google المصرّح به لإدارة المشاريع والإعدادات.
+                </p>
+                <button id="googleLoginBtn" type="button" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem;">
+                    <span>Sign in with Google</span>
+                </button>
+                <p id="loginError" style="color: #ef4444; margin-top: 1rem; text-align: center; display: none; font-size: 0.9rem;"></p>
             </div>
         </section>
 
         <!-- Admin Panel -->
         <section id="adminPanel" class="admin-panel container">
-            <h1 class="section-heading">Workspace Dashboard</h1>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <h1 class="section-heading" style="margin-bottom: 0.25rem;">Workspace Dashboard</h1>
+                    <p id="adminUserLabel" style="color: var(--clr-text-muted); font-size: 0.9rem;"></p>
+                </div>
+                <button id="signOutBtn" type="button" class="btn btn-outline" style="padding: 0.5rem 1.1rem; font-size: 0.9rem;">Sign Out</button>
+            </div>
+            <div id="adminNotice" class="settings-saved-badge" style="margin-bottom: 1rem;"></div>
 
             <div class="dashboard-grid">
                 <!-- Add Project -->
@@ -159,10 +166,10 @@
                     <h3>Add New Project</h3>
                     <form id="addProjectForm" class="mt-4">
                         <div class="form-group">
-                            <input type="text" id="projTitle" placeholder="Project Title" required>
+                            <input type="text" id="projTitle" placeholder="Project Title" maxlength="200" required>
                         </div>
                         <div class="form-group">
-                            <textarea id="projDesc" rows="3" placeholder="Short Description" required></textarea>
+                            <textarea id="projDesc" rows="3" placeholder="Short Description" maxlength="2000" required></textarea>
                         </div>
                         <!-- Image Upload Area -->
                         <div class="form-group">
@@ -175,11 +182,12 @@
                         </div>
 
                         <div class="form-group">
-                            <input type="text" id="projLink" placeholder="Project Link (رابط المعاينة إن وجد)">
+                            <input type="text" id="projLink" placeholder="Project Link (رابط المعاينة إن وجد)" maxlength="1000">
                         </div>
                         <div class="form-group">
                             <select id="projCategory" required>
-                                <option value="wordpress">WordPress Website (موقع ووردبريس)</option>
+                                <option value="wordpress">Websites &amp; Platforms (المواقع والمنصات)</option>
+                                <option value="motion_graphic">Motion Graphics &amp; Graphic Design (تصاميم الموشن جرافيك والجرافيك)</option>
                                 <option value="english">English Learning (تعلم الإنجليزية)</option>
                                 <option value="arabic">Arabic Language (اللغة العربية)</option>
                                 <option value="science">Science (العلوم)</option>
@@ -201,7 +209,7 @@
                     <div class="mt-4" style="display: flex; flex-direction: column; gap: 1rem;">
                         <button id="syncProjectsBtn" class="btn btn-primary">Sync All Required Projects (مزامنة كافة
                             المشاريع المطلوبة)</button>
-                        <button id="viewProjectsBtn" class="btn btn-outline">Check Site (مشاهدة الموقع)</button>
+                        <a id="viewProjectsBtn" href="index.html" class="btn btn-outline" style="text-align: center;">Check Site (مشاهدة الموقع)</a>
                     </div>
                 </div>
             </div>
@@ -257,69 +265,133 @@
         </section>
     </main>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script type="module">
+        import {
+            initFirebase,
+            OperationType,
+            handleFirestoreError,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            setDoc,
+            addDoc,
+            writeBatch,
+            serverTimestamp,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut,
+            onAuthStateChanged
+        } from './js/firebase-client.js';
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAZvvJOO9pZUODb4v9MMbYsxhk-64Ai7Vc",
-            authDomain: "fatma-portfolio.firebaseapp.com",
-            projectId: "fatma-portfolio",
-            storageBucket: "fatma-portfolio.firebasestorage.app",
-            messagingSenderId: "611447591534",
-            appId: "1:611447591534:web:b17ef5b85692885c964c7f",
-            measurementId: "G-57NCH1TCSQ"
-        };
-        // Guard against Firebase CDN load failure
         let db = null;
-        try {
-            if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-            } else {
-                console.warn('Firebase SDK not loaded — admin functions will be unavailable.');
-            }
-        } catch (e) {
-            console.warn('Firebase init failed:', e);
-        }
-
-        const ADMIN_PASS = "fatmaana@#1";
-        const loginForm = document.getElementById('loginForm');
-        const adminPanel = document.getElementById('adminPanel');
-
-        // Base64 image storage - no extra Firebase setup needed
+        let auth = null;
         let imageBase64 = '';
 
-        document.getElementById('imageUpload').addEventListener('change', function (e) {
+        const loginSection = document.getElementById('loginSection');
+        const adminPanel = document.getElementById('adminPanel');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const loginError = document.getElementById('loginError');
+        const adminUserLabel = document.getElementById('adminUserLabel');
+        const adminNotice = document.getElementById('adminNotice');
+
+        function showAdminNotice(msg, isError = false) {
+            if (!adminNotice) return;
+            adminNotice.textContent = msg;
+            adminNotice.style.background = isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)';
+            adminNotice.style.color = isError ? '#ef4444' : '#22c55e';
+            adminNotice.classList.add('visible');
+            clearTimeout(adminNotice._timer);
+            adminNotice._timer = setTimeout(() => adminNotice.classList.remove('visible'), 5000);
+        }
+
+        function compressImageToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('Invalid image file'));
+                    img.onload = () => {
+                        const maxDim = 1200;
+                        let { width, height } = img;
+                        if (width > maxDim || height > maxDim) {
+                            const scale = Math.min(maxDim / width, maxDim / height);
+                            width = Math.round(width * scale);
+                            height = Math.round(height * scale);
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        let quality = 0.82;
+                        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        while (dataUrl.length > 800000 && quality > 0.35) {
+                            quality -= 0.12;
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('imageUpload').addEventListener('change', async function (e) {
             const file = e.target.files[0];
             const status = document.getElementById('uploadStatus');
             if (!file) { imageBase64 = ''; status.textContent = ''; return; }
 
-            if (file.size > 2 * 1024 * 1024) {
-                alert('الصورة كبيرة جداً! اختار صورة أقل من 2MB.');
+            if (file.size > 5 * 1024 * 1024) {
+                status.textContent = '❌ الصورة كبيرة جداً! اختر صورة أقل من 5MB.';
+                status.style.color = '#ef4444';
                 e.target.value = '';
                 imageBase64 = '';
-                status.textContent = '';
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                imageBase64 = ev.target.result;
-                status.textContent = `✅ تم اختيار: ${file.name}`;
+            try {
+                imageBase64 = await compressImageToDataUrl(file);
+                if (imageBase64.length > 850000) {
+                    status.textContent = '❌ الصورة بعد الضغط ما زالت تتجاوز حد المستند. اختر صورة أصغر.';
+                    status.style.color = '#ef4444';
+                    imageBase64 = '';
+                    return;
+                }
+                status.textContent = `✅ تم اختيار وتجهيز: ${file.name}`;
                 status.style.color = '#a855f7';
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                status.textContent = '❌ تعذر قراءة الصورة المختارة.';
+                status.style.color = '#ef4444';
+                imageBase64 = '';
+            }
         });
 
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (document.getElementById('adminPassword').value === ADMIN_PASS) {
-                document.getElementById('loginSection').style.display = 'none';
-                adminPanel.style.display = 'block';
-            } else {
-                alert('Wrong Password!');
+        googleLoginBtn.addEventListener('click', async () => {
+            if (!auth) {
+                loginError.textContent = 'Firebase Auth is still loading or unavailable.';
+                loginError.style.display = 'block';
+                return;
             }
+            loginError.style.display = 'none';
+            googleLoginBtn.disabled = true;
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                loginError.textContent = err?.message || 'Google sign-in failed.';
+                loginError.style.display = 'block';
+            } finally {
+                googleLoginBtn.disabled = false;
+            }
+        });
+
+        signOutBtn.addEventListener('click', async () => {
+            if (!auth) return;
+            await signOut(auth);
         });
 
         document.getElementById('addProjectForm').addEventListener('submit', async (e) => {
@@ -329,110 +401,109 @@
             submitBtn.textContent = '⏳ جاري الحفظ...';
 
             if (!db) {
-                alert('❌ Firebase غير متاح حالياً. تأكد من اتصالك بالإنترنت.');
+                showAdminNotice('❌ Firebase غير متاح حالياً.', true);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Save Project (حفظ المشروع الآن)';
                 return;
             }
 
-            // Use base64 image or fallback placeholder
-            const finalImage = imageBase64 || 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=600&auto=format&fit=crop';
+            const finalImage = imageBase64 || 'assets/img/covers/mastery-funnel.svg';
 
             try {
-                await db.collection("projects").add({
-                    title: document.getElementById('projTitle').value,
-                    desc: document.getElementById('projDesc').value,
+                await addDoc(collection(db, 'projects'), {
+                    title: document.getElementById('projTitle').value.trim().slice(0, 200),
+                    desc: document.getElementById('projDesc').value.trim().slice(0, 2000),
                     image: finalImage,
-                    link: document.getElementById('projLink').value || '#',
+                    link: (document.getElementById('projLink').value.trim() || '#').slice(0, 1000),
                     category: document.getElementById('projCategory').value,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: serverTimestamp()
                 });
 
-                alert('✅ تم الحفظ! المشروع ظهر على الموقع دلوقتي.');
-                location.reload();
+                e.target.reset();
+                imageBase64 = '';
+                document.getElementById('uploadStatus').textContent = '';
+                showAdminNotice('✅ تم الحفظ! المشروع ظهر على الموقع دلوقتي.');
             } catch (err) {
-                alert('❌ خطأ في الحفظ: ' + err.message + '\n\nتأكد من إعدادات Firestore Rules.');
+                showAdminNotice('❌ خطأ في الحفظ: تأكد من تسجيل الدخول بحساب المسؤول.', true);
+                handleFirestoreError(err, OperationType.CREATE, 'projects');
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Save Project (حفظ المشروع الآن)';
             }
         });
 
-        document.getElementById('viewProjectsBtn').onclick = () => window.open('index.html', '_blank');
-
         document.getElementById('syncProjectsBtn').onclick = async () => {
             const btn = document.getElementById('syncProjectsBtn');
             if (!db) {
-                alert('❌ Firebase غير متاح. تأكد من اتصالك بالإنترنت.');
+                showAdminNotice('❌ Firebase غير متاح.', true);
                 return;
             }
             btn.disabled = true;
             btn.textContent = '⏳ Syncing...';
 
             const defaultProjects = [
-                { title: "Premium WordPress Showcase", desc: "Custom WordPress development and creative engineering.", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop", link: "https://fatmaana1234.github.io/wordpress/", category: "WordPress" },
-                { title: "NurseLearn: Aging Care", desc: "Specialized aging care and clinical education platform.", image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop", link: "https://fatmaana1234.github.io/NurseLearn-Aging/", category: "WordPress" },
-                { title: "AI Customer Experience", desc: "Next-gen portal with automated customer intelligence.", image: "https://images.unsplash.com/photo-1531746790731-6c087fecd05a?q=80&w=800&auto=format&fit=crop", link: "https://fatmaana1234.github.io/customer-service/", category: "WordPress" },
-                { title: "LearnWithMe Academy", desc: "Learning platform for digital skills mastery.", image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop", link: "http://learnwithme.42web.io/", category: "WordPress" },
-                { title: "Wedding Invitation Design", desc: "Elegant design created on Canva.", image: "https://images.unsplash.com/photo-1607190074257-dd4b7af0309f?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/8vnnlluoys6nh3b", category: "Other" },
-                { title: "Professional Resume Design", desc: "Modern resume design for career growth.", image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/menpsya3mf0mal1", category: "Other" },
-                { title: "Creative Video Design 1", desc: "Stunning video design project.", image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/9d7u8qje5r8ma8r", category: "Other" },
-                { title: "Creative Video Design 2", desc: "Advanced motion graphics design.", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/mj6x81jm20ntnv6", category: "Other" },
-                { title: "Nursing Related Video", desc: "Healthcare education video content.", image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/pskodg7m15m2uec", category: "Other" },
-                { title: "Portfolio Visual Identity", desc: "Visual updates and identity design.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop", link: "https://canva.link/5h3jhvtxvctswje", category: "Other" },
-                { title: "Elderly Care Support Video", desc: "Compassionate video about elderly care.", image: "https://images.unsplash.com/photo-1581578731522-aa796ca87648?q=80&w=800&auto=format&fit=crop", link: "https://drive.google.com/file/d/1g2WhHfUcBeei6LkjJ-AFbUozBEsHmPVB/view?usp=drive_link", category: "Other" },
-                { title: "Child Care & Upbringing", desc: "Educational video content on children.", image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=800&auto=format&fit=crop", link: "https://drive.google.com/file/d/1UFD5dZMRnny1Gwm17E3oMOjOKiKQ8EGU/view?usp=sharing", category: "Other" }
+                { title: "Premium WordPress Showcase", desc: "Custom WordPress development and creative engineering.", image: "assets/img/covers/mastery-funnel.svg", link: "https://fatmaana1234.github.io/wordpress/", category: "wordpress" },
+                { title: "NurseLearn: Aging Care", desc: "Specialized aging care and clinical education platform.", image: "assets/img/nurse-ai.png", link: "https://fatmaana1234.github.io/NurseLearn-Aging/", category: "wordpress" },
+                { title: "AI Customer Experience", desc: "Next-gen portal with automated customer intelligence.", image: "assets/img/portfolio-ai.png", link: "https://fatmaana1234.github.io/customer-service/", category: "wordpress" },
+                { title: "LearnWithMe Academy", desc: "Learning platform for digital skills mastery.", image: "assets/img/covers/english-series.svg", link: "http://learnwithme.42web.io/", category: "wordpress" },
+                { title: "Wedding Invitation Design", desc: "Elegant design created on Canva.", image: "assets/img/covers/arabic-masterpieces.svg", link: "https://canva.link/8vnnlluoys6nh3b", category: "other" },
+                { title: "Professional Resume Design", desc: "Modern resume design for career growth.", image: "assets/img/covers/mastery-funnel.svg", link: "https://canva.link/menpsya3mf0mal1", category: "other" },
+                { title: "Creative Video Design 1", desc: "Stunning video design project.", image: "assets/img/motion_thumb_1.jpg", link: "https://canva.link/9d7u8qje5r8ma8r", category: "other" },
+                { title: "Creative Video Design 2", desc: "Advanced motion graphics design.", image: "assets/img/motion_thumb_2.jpg", link: "https://canva.link/mj6x81jm20ntnv6", category: "other" },
+                { title: "Nursing Related Video", desc: "Healthcare education video content.", image: "assets/img/health_hero_ui_1778253153287.png", link: "https://canva.link/pskodg7m15m2uec", category: "other" },
+                { title: "Portfolio Visual Identity", desc: "Visual updates and identity design.", image: "assets/img/portfolio-ai.png", link: "https://canva.link/5h3jhvtxvctswje", category: "other" },
+                { title: "Elderly Care Support Video", desc: "Compassionate video about elderly care.", image: "assets/img/covers/health-camp.svg", link: "https://drive.google.com/file/d/1g2WhHfUcBeei6LkjJ-AFbUozBEsHmPVB/view?usp=drive_link", category: "other" },
+                { title: "Child Care & Upbringing", desc: "Educational video content on children.", image: "assets/img/covers/social-saudi-manners.svg", link: "https://drive.google.com/file/d/1UFD5dZMRnny1Gwm17E3oMOjOKiKQ8EGU/view?usp=sharing", category: "other" }
             ];
 
             try {
-                // Delete existing ones to clean up
-                const snapshot = await db.collection("projects").get();
-                const b = db.batch();
-                snapshot.docs.forEach(doc => b.delete(doc.ref));
+                const snapshot = await getDocs(collection(db, 'projects'));
+                const b = writeBatch(db);
+                snapshot.docs.forEach(docSnap => b.delete(docSnap.ref));
+                defaultProjects.forEach(p => {
+                    const newRef = doc(collection(db, 'projects'));
+                    b.set(newRef, { ...p, createdAt: serverTimestamp() });
+                });
                 await b.commit();
-
-                // Add new ones
-                for (const p of defaultProjects) {
-                    await db.collection("projects").add({ ...p, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                }
-                alert('✅ Database Synced Successfully! All 12 projects are now live.');
-                location.reload();
+                showAdminNotice('✅ Database Synced Successfully! All 12 projects are now live.');
             } catch (err) {
-                alert('Err: ' + err.message);
+                showAdminNotice('❌ خطأ أثناء المزامنة: تأكد من تسجيل الدخول بحساب المسؤول.', true);
+                handleFirestoreError(err, OperationType.WRITE, 'projects');
+            } finally {
                 btn.disabled = false;
-                btn.textContent = 'Sync All Required Projects';
-
+                btn.textContent = 'Sync All Required Projects (مزامنة كافة المشاريع المطلوبة)';
             }
         };
 
-        /* ============================================================
-           Site Settings — Save / Load (slider, sound, chatbot, scroll-top)
-           ============================================================ */
         const SETTINGS_DEFAULTS = { show_slider: true, show_sound: true, show_chatbot: true, show_scroll_top: true };
-
-        function loadSettingsForm() {
-            const local = localStorage.getItem('site_settings');
-            let s = { ...SETTINGS_DEFAULTS };
-            if (local) {
-                try { s = { ...s, ...JSON.parse(local) }; } catch (e) {}
-            }
-            // If Firebase available, fetch latest (overrides local)
-            if (db) {
-                db.collection('settings').doc('site').get().then(doc => {
-                    if (doc.exists) {
-                        s = { ...s, ...doc.data() };
-                    }
-                    fillSettingsForm(s);
-                }).catch(() => fillSettingsForm(s));
-            } else {
-                fillSettingsForm(s);
-            }
-        }
 
         function fillSettingsForm(s) {
             document.getElementById('settingSlider').checked = s.show_slider !== false;
             document.getElementById('settingSound').checked = s.show_sound !== false;
             document.getElementById('settingChatbot').checked = s.show_chatbot !== false;
             document.getElementById('settingScrollTop').checked = s.show_scroll_top !== false;
+        }
+
+        async function loadSettingsForm() {
+            const local = localStorage.getItem('site_settings');
+            let s = { ...SETTINGS_DEFAULTS };
+            if (local) {
+                try { s = { ...s, ...JSON.parse(local) }; } catch (e) {}
+            }
+            if (db) {
+                try {
+                    const docSnap = await getDoc(doc(db, 'settings', 'site'));
+                    if (docSnap.exists()) {
+                        s = { ...s, ...docSnap.data() };
+                    }
+                    fillSettingsForm(s);
+                } catch (err) {
+                    fillSettingsForm(s);
+                    handleFirestoreError(err, OperationType.GET, 'settings/site');
+                }
+            } else {
+                fillSettingsForm(s);
+            }
         }
 
         document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
@@ -442,41 +513,69 @@
                 show_slider: document.getElementById('settingSlider').checked,
                 show_sound: document.getElementById('settingSound').checked,
                 show_chatbot: document.getElementById('settingChatbot').checked,
-                show_scroll_top: document.getElementById('settingScrollTop').checked
+                show_scroll_top: document.getElementById('settingScrollTop').checked,
+                updatedAt: serverTimestamp()
             };
 
-            // Save to localStorage (works without Firebase)
-            try { localStorage.setItem('site_settings', JSON.stringify(settings)); } catch (e) {}
+            try {
+                localStorage.setItem('site_settings', JSON.stringify({
+                    show_slider: settings.show_slider,
+                    show_sound: settings.show_sound,
+                    show_chatbot: settings.show_chatbot,
+                    show_scroll_top: settings.show_scroll_top
+                }));
+            } catch (e) {}
 
-            // Save to Firebase if available
             if (db) {
                 btn.disabled = true;
                 btn.textContent = '⏳ Saving...';
                 try {
-                    await db.collection('settings').doc('site').set(settings, { merge: true });
+                    await setDoc(doc(db, 'settings', 'site'), settings, { merge: true });
                     badge.classList.add('visible');
-                    btn.disabled = false;
-                    btn.textContent = 'Save Settings (حفظ الإعدادات)';
                     setTimeout(() => badge.classList.remove('visible'), 3500);
                 } catch (err) {
-                    alert('⚠️ تم الحفظ محليًا فقط. Firebase خطأ: ' + err.message);
+                    showAdminNotice('⚠️ تم الحفظ محليًا فقط. تأكد من صلاحية المسؤول.', true);
+                    handleFirestoreError(err, OperationType.WRITE, 'settings/site');
+                } finally {
                     btn.disabled = false;
                     btn.textContent = 'Save Settings (حفظ الإعدادات)';
                 }
             } else {
                 badge.classList.add('visible');
                 setTimeout(() => badge.classList.remove('visible'), 3500);
-                // Optional: open site in new tab so user can verify
             }
         });
 
-        // Load settings form when admin logs in
-        loginForm.addEventListener('submit', () => {
-            // After successful login (the existing handler does the show/hide), load settings
-            setTimeout(loadSettingsForm, 200);
-        });
-        // Also pre-load settings so they're ready when admin logs in
-        window.addEventListener('DOMContentLoaded', loadSettingsForm);
+        async function bootstrapAdmin() {
+            const fb = await initFirebase();
+            db = fb.db;
+            auth = fb.auth;
+
+            if (!auth) {
+                loginError.textContent = 'Could not initialize Firebase Authentication.';
+                loginError.style.display = 'block';
+                return;
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loginSection.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    adminUserLabel.textContent = `Signed in as: ${user.email || user.uid}`;
+                    loadSettingsForm();
+                } else {
+                    adminPanel.style.display = 'none';
+                    loginSection.style.display = 'flex';
+                    adminUserLabel.textContent = '';
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootstrapAdmin);
+        } else {
+            bootstrapAdmin();
+        }
     </script>
 </body>
 

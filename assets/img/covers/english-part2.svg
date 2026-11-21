@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111b3d"/>
+      <stop offset="100%" stop-color="#1c2d63"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#60a5fa" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#60a5fa" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Sentence Formula Blocks -->
+    <rect x="95" y="160" width="180" height="105" rx="16" fill="#1e40af" stroke="#93c5fd" stroke-width="2"/>
+    <text x="185" y="206" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#fff">SUBJECT</text>
+    <text x="185" y="236" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#bfdbfe">I / You / She</text>
+    <text x="292" y="220" text-anchor="middle" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#60a5fa">+</text>
+
+    <rect x="310" y="160" width="180" height="105" rx="16" fill="#0369a1" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="400" y="206" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#fff">VERB</text>
+    <text x="400" y="236" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#bae6fd">Learn / Write</text>
+    <text x="507" y="220" text-anchor="middle" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#60a5fa">+</text>
+
+    <rect x="525" y="160" width="180" height="105" rx="16" fill="#0f766e" stroke="#5eead4" stroke-width="2"/>
+    <text x="615" y="206" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#fff">OBJECT</text>
+    <text x="615" y="236" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#ccfbf1">English Fast</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="206" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#60a5fa" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#60a5fa" letter-spacing="0.8">ENGLISH • PART 02</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#60a5fa"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">تعلم الإنجليزية — القواعد الأساسية (ج٢)</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Essential Sentence Structure &amp; Core English Grammar</text>
+</svg>

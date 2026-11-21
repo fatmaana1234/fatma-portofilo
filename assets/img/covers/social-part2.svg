@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2a24"/>
+      <stop offset="100%" stop-color="#124239"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#2dd4bf" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#2dd4bf" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <rect x="135" y="105" width="530" height="230" rx="18" fill="#071e1a" stroke="#2dd4bf" stroke-opacity="0.5" stroke-width="1.8"/>
+    <path d="M165 260 Q 280 140, 410 210 T 625 160" fill="none" stroke="#2dd4bf" stroke-width="4" stroke-dasharray="10 6"/>
+    <circle cx="240" cy="212" r="14" fill="#fbbf24"/><circle cx="410" cy="210" r="16" fill="#2dd4bf"/><circle cx="570" cy="176" r="14" fill="#f472b6"/>
+    <path d="M410 135 C428 135 442 150 442 168 C442 190 410 216 410 216 C410 216 378 190 378 168 C378 150 392 135 410 135 Z" fill="#2dd4bf"/>
+    <circle cx="410" cy="168" r="11" fill="#071e1a"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="276" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#2dd4bf" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#2dd4bf" letter-spacing="0.8">SOCIAL STUDIES • PART 02</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#2dd4bf"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">الوعي الجغرافي والقيم الوطنية — الجزء الثاني</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Regional Maps, Location Pinpointing &amp; Cultural Identity</text>
+</svg>

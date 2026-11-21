@@ -1,0 +1,158 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Global Helpers
+    // =========================================================================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'fatmaana4444@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // =========================================================================
+    // Entity Validation Blueprints
+    // =========================================================================
+    function isValidProject(data) {
+      return data.keys().hasAll(['title', 'desc', 'image', 'link', 'category', 'createdAt'])
+        && data.keys().hasOnly(['title', 'title_ar', 'desc', 'desc_ar', 'image', 'link', 'category', 'createdAt'])
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && (!('title_ar' in data) || (data.title_ar is string && data.title_ar.size() <= 200))
+        && data.desc is string && data.desc.size() >= 1 && data.desc.size() <= 2000
+        && (!('desc_ar' in data) || (data.desc_ar is string && data.desc_ar.size() <= 2000))
+        && data.image is string && data.image.size() >= 1 && data.image.size() <= 900000
+        && data.link is string && data.link.size() >= 1 && data.link.size() <= 1000
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 50
+        && data.createdAt is timestamp;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['name', 'text', 'rating', 'createdAt'])
+        && data.keys().hasOnly(['name', 'text', 'rating', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 1000
+        && data.rating is int && data.rating >= 1 && data.rating <= 5
+        && data.createdAt is timestamp;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['name', 'email', 'message', 'createdAt'])
+        && data.keys().hasOnly(['name', 'email', 'message', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 150
+        && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 3000
+        && data.createdAt is timestamp;
+    }
+
+    function isValidSettings(data) {
+      return data.keys().hasAll(['show_slider', 'show_sound', 'show_chatbot', 'show_scroll_top'])
+        && data.keys().hasOnly(['show_slider', 'show_sound', 'show_chatbot', 'show_scroll_top', 'updatedAt'])
+        && data.show_slider is bool
+        && data.show_sound is bool
+        && data.show_chatbot is bool
+        && data.show_scroll_top is bool
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt'])
+        && data.keys().hasOnly(['email', 'role', 'createdAt'])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 150
+        && data.role == 'admin'
+        && data.createdAt is timestamp;
+    }
+
+    // =========================================================================
+    // Collection Rules
+    // =========================================================================
+
+    // Connection health check path
+    match /test/{docId} {
+      allow get: if isValidId(docId) && docId == 'connection';
+      allow list, write: if false;
+    }
+
+    // Public portfolio projects catalog (non-PII), admin-managed
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidId(projectId) && isValidProject(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'title_ar', 'desc', 'desc_ar', 'image', 'link', 'category']);
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    // Public client reviews (testimonials): public read & validated create, admin delete
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId);
+      allow list: if true;
+      allow create: if isValidId(reviewId) && isValidReview(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidId(reviewId) && isValidReview(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'text', 'rating']);
+      allow delete: if isAdmin() && isValidId(reviewId);
+    }
+
+    // Contact messages (contains PII: email) — write-once public create, admin-only read/delete
+    match /messages/{messageId} {
+      allow get: if isAdmin() && isValidId(messageId);
+      allow list: if isAdmin();
+      allow create: if isValidId(messageId) && isValidMessage(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(messageId);
+    }
+
+    // Site UI settings (/settings/site) — public read, admin write
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'site';
+      allow list: if false;
+      allow create: if isAdmin() && settingId == 'site' && isValidSettings(incoming())
+        && (!('updatedAt' in incoming()) || incoming().updatedAt == request.time);
+      allow update: if isAdmin() && settingId == 'site' && isValidSettings(incoming())
+        && (!('updatedAt' in incoming()) || incoming().updatedAt == request.time)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['show_slider', 'show_sound', 'show_chatbot', 'show_scroll_top', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    // Admin registry
+    match /admins/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidId(userId) && isValidAdmin(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+  }
+}

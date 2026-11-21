@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#191c3a"/>
+      <stop offset="100%" stop-color="#282e5c"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#fbbf24" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#fbbf24" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <rect x="145" y="115" width="280" height="205" rx="14" fill="#10142e" stroke="#fbbf24" stroke-width="2.5"/>
+    <path d="M215 115 V320 M285 115 V320 M355 115 V320 M145 183 H425 M145 251 H425" stroke="#fbbf24" stroke-opacity="0.55" stroke-width="2"/>
+    <rect x="465" y="135" width="210" height="165" rx="16" fill="#232852" stroke="#38bdf8" stroke-width="2"/>
+    <text x="570" y="198" text-anchor="middle" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="#fbbf24">4 × 3 = 12</text>
+    <text x="570" y="244" text-anchor="middle" font-family="Cairo, sans-serif" font-size="18" font-weight="700" fill="#e0f2fe">خاصية التجميع والمساحة</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="256" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#fbbf24" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#fbbf24" letter-spacing="0.8">PRIMARY MATH • GRADE 3</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#fbbf24"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">رياضيات الصف الثالث الابتدائي — المساحة</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Smart Interactive Area &amp; Associative Property Lesson</text>
+</svg>

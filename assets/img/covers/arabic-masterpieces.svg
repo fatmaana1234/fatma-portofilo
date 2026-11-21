@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a0e2e"/>
+      <stop offset="100%" stop-color="#421545"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#fbbf24" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#fbbf24" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <circle cx="265" cy="215" r="102" fill="#3b1240" stroke="#fbbf24" stroke-width="2.5"/>
+    <text x="265" y="252" text-anchor="middle" font-family="Cairo, serif" font-size="112" font-weight="800" fill="#fbbf24">ض</text>
+    <rect x="410" y="130" width="265" height="175" rx="18" fill="#1e0821" stroke="#f472b6" stroke-opacity="0.55" stroke-width="1.8"/>
+    <text x="542" y="185" text-anchor="middle" font-family="Cairo, sans-serif" font-size="30" font-weight="800" fill="#ffffff">أ  •  ب  •  ت</text>
+    <text x="542" y="232" text-anchor="middle" font-family="Cairo, sans-serif" font-size="18" font-weight="600" fill="#fbcfe8">قواعد النحو • القراءة المعبرة</text>
+    <rect x="460" y="255" width="165" height="24" rx="12" fill="#fbbf24"/>
+    <text x="542" y="272" text-anchor="middle" font-family="Cairo, sans-serif" font-size="12" font-weight="800" fill="#1e0821">لغة الضاد</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="186" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#fbbf24" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#fbbf24" letter-spacing="0.8">ARABIC LANGUAGE</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#fbbf24"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">روائع اللغة العربية والنحو والقراءة</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Simplifying Arabic Grammar &amp; Fostering Reading Joy</text>
+</svg>

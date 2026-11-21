@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09212e"/>
+      <stop offset="100%" stop-color="#10354a"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#22d3ee" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#22d3ee" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <circle cx="245" cy="212" r="82" fill="#22d3ee" fill-opacity="0.16" stroke="#22d3ee" stroke-width="3.5"/>
+    <line x1="245" y1="212" x2="327" y2="212" stroke="#fbbf24" stroke-width="3"/>
+    <text x="285" y="198" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="#fbbf24">r</text>
+    <text x="245" y="260" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#cffafe">πr²</text>
+
+    <polygon points="415,288 530,122 655,288" fill="#a855f7" fill-opacity="0.2" stroke="#c084fc" stroke-width="3.5"/>
+    <line x1="530" y1="122" x2="530" y2="288" stroke="#34d399" stroke-dasharray="6 4" stroke-width="2.5"/>
+    <rect x="530" y="268" width="20" height="20" fill="none" stroke="#34d399" stroke-width="2"/>
+    <text x="535" y="314" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#a7f3d0">base × height</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="256" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#22d3ee" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#22d3ee" letter-spacing="0.8">GEOMETRY &amp; MEASUREMENT</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#22d3ee"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">الهندسة والمساحة — المفاهيم الهندسية</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Polygons, Circles, Angles &amp; Area Formulas Explained</text>
+</svg>

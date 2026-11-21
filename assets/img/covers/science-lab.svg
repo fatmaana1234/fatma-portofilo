@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1c2e"/>
+      <stop offset="100%" stop-color="#192d47"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#2dd4bf" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#2dd4bf" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- 3 Test Tubes in Rack -->
+    <rect x="210" y="285" width="380" height="18" rx="6" fill="#475569"/>
+    <rect x="245" y="135" width="44" height="150" rx="22" fill="#0f2942" stroke="#94a3b8" stroke-width="3"/>
+    <rect x="249" y="205" width="36" height="76" rx="18" fill="#2dd4bf"/>
+    <rect x="378" y="120" width="44" height="165" rx="22" fill="#0f2942" stroke="#94a3b8" stroke-width="3"/>
+    <rect x="382" y="185" width="36" height="96" rx="18" fill="#a855f7"/>
+    <rect x="511" y="140" width="44" height="145" rx="22" fill="#0f2942" stroke="#94a3b8" stroke-width="3"/>
+    <rect x="515" y="215" width="36" height="66" rx="18" fill="#fbbf24"/>
+    <circle cx="267" cy="185" r="5" fill="#99f6e4"/><circle cx="400" cy="162" r="6" fill="#e9d5ff"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="165" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#2dd4bf" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#2dd4bf" letter-spacing="0.8">SCIENCE LAB</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#2dd4bf"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">مختبر العلوم التفاعلي والتجارب</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Classroom Scientific Experiments &amp; Practical Discovery</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1233"/>
+      <stop offset="100%" stop-color="#311a54"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#fbbf24" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#fbbf24" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <!-- Chemistry Flask + Manuscript Scroll -->
+    <path d="M235 120 L275 120 L275 180 L330 295 A16 16 0 0 1 315 316 L195 316 A16 16 0 0 1 180 295 L235 180 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+    <path d="M202 258 L308 258 L322 294 A12 12 0 0 1 310 310 L200 310 A12 12 0 0 1 188 294 Z" fill="#22d3ee" fill-opacity="0.7"/>
+    <circle cx="242" cy="235" r="8" fill="#67e8f9"/><circle cx="268" cy="210" r="6" fill="#67e8f9"/>
+    <!-- Golden Scroll -->
+    <rect x="415" y="135" width="230" height="165" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+    <line x1="448" y1="180" x2="612" y2="180" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+    <line x1="448" y1="215" x2="612" y2="215" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+    <line x1="448" y1="250" x2="575" y2="250" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="186" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#fbbf24" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#fbbf24" letter-spacing="0.8">CHEMISTRY STORY</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#fbbf24"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">جابر بن حيان والورق السحري</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Illustrated Story of Pioneer Chemist Jabir ibn Hayyan</text>
+</svg>

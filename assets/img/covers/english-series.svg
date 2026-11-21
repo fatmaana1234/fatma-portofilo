@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c1e3a"/>
+      <stop offset="100%" stop-color="#17325c"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#38bdf8" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#38bdf8" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <rect x="110" y="102" width="275" height="225" rx="18" fill="#0f294a" stroke="#38bdf8" stroke-opacity="0.6" stroke-width="2"/>
+    <text x="247" y="198" text-anchor="middle" font-family="Inter, sans-serif" font-size="68" font-weight="800" fill="#38bdf8">Aa Bb</text>
+    <text x="247" y="250" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#e0f2fe">Vocabulary • Grammar</text>
+    <rect x="165" y="275" width="165" height="28" rx="14" fill="#38bdf8"/>
+    <text x="247" y="294" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#082f49">START LESSON</text>
+    <!-- Speech Bubbles -->
+    <rect x="430" y="118" width="250" height="72" rx="18" fill="#1e3a8a" stroke="#7dd3fc" stroke-width="1.5"/>
+    <text x="555" y="160" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff">"Hello! How are you?"</text>
+    <rect x="455" y="220" width="235" height="72" rx="18" fill="#0369a1" stroke="#bae6fd" stroke-width="1.5"/>
+    <text x="572" y="262" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" font-weight="700" fill="#ffffff">"Let's speak English!"</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="196" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#38bdf8" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#38bdf8" letter-spacing="0.8">ENGLISH LEARNING</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#38bdf8"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">سلسلة تعلم الإنجليزية الممتعة</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Interactive Grammar &amp; Vocabulary for Beginners</text>
+</svg>

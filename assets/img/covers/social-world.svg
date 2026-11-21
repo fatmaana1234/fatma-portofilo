@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b2e"/>
+      <stop offset="100%" stop-color="#2b2547"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#f59e0b" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#f59e0b" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <circle cx="290" cy="215" r="102" fill="#0f2942" stroke="#f59e0b" stroke-width="3"/>
+    <ellipse cx="290" cy="215" rx="52" ry="102" fill="none" stroke="#fbbf24" stroke-opacity="0.6" stroke-width="2"/>
+    <line x1="188" y1="215" x2="392" y2="215" stroke="#fbbf24" stroke-opacity="0.6" stroke-width="2"/>
+    <line x1="202" y1="168" x2="378" y2="168" stroke="#fbbf24" stroke-opacity="0.4" stroke-width="1.5"/>
+    <line x1="202" y1="262" x2="378" y2="262" stroke="#fbbf24" stroke-opacity="0.4" stroke-width="1.5"/>
+    <!-- Compass -->
+    <circle cx="545" cy="215" r="82" fill="#231c3d" stroke="#f59e0b" stroke-width="2"/>
+    <polygon points="545,148 562,215 545,282 528,215" fill="#f59e0b" fill-opacity="0.85"/>
+    <polygon points="478,215 545,198 612,215 545,232" fill="#38bdf8" fill-opacity="0.75"/>
+    <circle cx="545" cy="215" r="10" fill="#ffffff"/>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="176" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#f59e0b" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#f59e0b" letter-spacing="0.8">SOCIAL STUDIES</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#f59e0b"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">عالم الدراسات الاجتماعية والتاريخ</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Storytelling History &amp; World Geography Exploration</text>
+</svg>

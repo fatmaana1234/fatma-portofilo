@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#122436"/>
+      <stop offset="100%" stop-color="#1d3752"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <circle cx="670" cy="110" r="170" fill="#38bdf8" fill-opacity="0.12"/>
+  <circle cx="130" cy="420" r="140" fill="#38bdf8" fill-opacity="0.08"/>
+
+  <!-- Bespoke Subject Illustration -->
+  
+    <rect x="145" y="102" width="510" height="238" rx="16" fill="#0d1b2a" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="2"/>
+    <line x1="185" y1="168" x2="615" y2="168" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="2"/>
+    <line x1="185" y1="226" x2="615" y2="226" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="2"/>
+    <line x1="185" y1="284" x2="615" y2="284" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="2"/>
+    <text x="595" y="156" text-anchor="end" font-family="Cairo, sans-serif" font-size="24" font-weight="700" fill="#e0f2fe">✓  الهمزة المتوسطة والكتابة الصحيحة</text>
+    <text x="595" y="214" text-anchor="end" font-family="Cairo, sans-serif" font-size="24" font-weight="700" fill="#7dd3fc">✓  التاء المربوطة والمفتوحة</text>
+    <text x="595" y="272" text-anchor="end" font-family="Cairo, sans-serif" font-size="24" font-weight="700" fill="#34d399">✓  تطبيقات إملائية تفاعلية</text>
+    
+
+  <!-- Top Left Domain Badge -->
+  <rect x="44" y="36" rx="10" ry="10" width="306" height="36" fill="#0f172a" fill-opacity="0.65" stroke="#38bdf8" stroke-opacity="0.65" stroke-width="1.5"/>
+  <text x="64" y="60" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="700" fill="#38bdf8" letter-spacing="0.8">ARABIC • SPELLING &amp; WRITING</text>
+
+  <!-- Bottom Informative Title Strip -->
+  <rect x="44" y="378" width="712" height="86" rx="16" fill="#090d1a" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+  <rect x="44" y="378" width="6" height="86" rx="3" fill="#38bdf8"/>
+  <text x="734" y="416" text-anchor="end" font-family="Cairo, Inter, sans-serif" font-size="25" font-weight="800" fill="#ffffff">اللغة العربية — مراجعة وتعزيز الإملاء</text>
+  <text x="734" y="446" text-anchor="end" font-family="Inter, Cairo, sans-serif" font-size="14" font-weight="600" fill="#cbd5e1">Interactive Arabic Spelling &amp; Writing Practice</text>
+</svg>
